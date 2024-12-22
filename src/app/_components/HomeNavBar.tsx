@@ -3,9 +3,10 @@
 import { useState } from "react";
 import Image from "next/image";
 import HomeSearchBar from "./HomeSearchBar";
+import Link from "next/link";
 
 const HomeNavBar = () => {
-  const [openSidebar, setOpenSidebar] = useState<Boolean>(true);
+  const [openSidebar, setOpenSidebar] = useState<boolean>(true);
 
   return (
     <nav className="flex w-full items-center pl-1 pr-3">
@@ -28,14 +29,14 @@ const HomeNavBar = () => {
             ></use>
           </svg>
         </div>
-        <a href="/" aria-label="Airtable home" className="mx-3">
+        <Link href="/" aria-label="Airtable home" className="mx-3">
           <Image
             src={"/airtable.svg"}
             alt={"image of the airtable logo"}
             width={102}
             height={22.2}
           />
-        </a>
+        </Link>
       </div>
       <div className="flex w-[354px] justify-center">
         <HomeSearchBar />
