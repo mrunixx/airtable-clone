@@ -9,7 +9,7 @@ const HomeNavBar = () => {
   const [openSidebar, setOpenSidebar] = useState<boolean>(true);
 
   return (
-    <nav className="flex w-full items-center pl-1 pr-3">
+    <nav className="flex h-[56px] w-full items-center pl-1 pr-3">
       <div className="flex w-2/5 flex-auto items-center">
         <div
           tabIndex={0}
