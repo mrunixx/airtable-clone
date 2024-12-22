@@ -4,7 +4,7 @@ const HomeDashboard = () => {
   return (
     <div className="flex flex-auto flex-col bg-[#f8fafc] px-12 py-8">
       <p className="text-[1.75rem] font-semibold pb-6">Home</p>
-      <div className="flex gap-4">
+      <div className="flex flex-wrap gap-4">
         <DashboardCard
           heading="Start with AI"
           info="Turn your process into an app with data and interfaces using AI."

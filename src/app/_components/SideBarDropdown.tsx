@@ -8,7 +8,7 @@ const SideBarDropdown = ({ children, heading, addFunctionality }: Props) => {
   return (
     <div
       role="button"
-      className="mb-1 flex h-[40px] w-full items-center justify-between text-base hover:bg-gray-100 px-2 py-3"
+      className="mb-1 flex h-[40px] w-full items-center justify-between text-base hover:bg-gray-100 px-2 py-3 rounded-sm"
     >
       <p>{heading}</p>
       <div className="actions flex items-center justify-center gap-2">

@@ -3,7 +3,7 @@ const HomeSearchBar = () => {
     <div
       tabIndex={0}
       role="button"
-      className="flex w-full items-center justify-between rounded-3xl border-[1px] px-4 py-1"
+      className="flex w-full items-center justify-between rounded-3xl shadow-elevation-low px-4 py-1 hover:shadow-elevation-medium"
     >
       <div className="flex items-center">
         <svg
