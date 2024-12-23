@@ -15,7 +15,7 @@ const BasePage = () => {
       setBase(base);
     }
 
-    getBase()
+    void getBase()
   }, [baseId])
 
   return <>
