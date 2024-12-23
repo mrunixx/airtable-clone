@@ -1,3 +1,4 @@
+import { redirect } from "next/navigation";
 import BaseNavigationOptionButton from "./BaseNavigationOptionButton";
 
 type Props = {
@@ -8,7 +9,7 @@ const BaseNavBar = ({ baseName }: Props) => {
   return (
     <nav className="bg-red-dusty flex h-[56px] w-full items-center pl-5 pr-4">
       <div className="left mr-auto flex items-center gap-3">
-        <div className="" role="button">
+        <div className="" role="button" onClick={() => redirect("/")}>
           <svg
             width="24"
             height="20.4"

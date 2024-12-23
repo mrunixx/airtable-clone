@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { api } from "~/trpc/react";
 import BaseNavBar from "../_components/BaseNavBar";
 import BaseToolBar from "../_components/BaseToolBar";
+import Table from "../_components/Table";
 
 const BasePage = () => {
   const baseId = usePathname();
@@ -33,6 +34,7 @@ const BasePage = () => {
         <div className="w-full min-h-screen">
           <BaseNavBar baseName={base?.name}/>
           <BaseToolBar />
+          <Table base={base}/>
         </div>
       )}
     </>
