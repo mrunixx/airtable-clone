@@ -53,7 +53,7 @@ const Table = ({ base }: Props) => {
   });
 
   return (
-    <div className="p-4">
+    <div className="">
       <table className="table-auto border-collapse border border-gray-300">
         <thead className="bg-gray-100">
           {tableInstance.getHeaderGroups().map((headerGroup) => (
