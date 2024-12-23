@@ -8,7 +8,7 @@ import { api } from "~/trpc/react";
 const BasePage = () => {
   const baseId = usePathname();
   const [base, setBase] = useState<Base | null>(null);
-  const getBaseMutation = api.base.get.useMutation();
+  const getBaseMutation = api.base.getBase.useMutation();
   useEffect(() => {
     const getBase = async () => {
       const base = await getBaseMutation.mutateAsync({ id: baseId.slice(1) });

@@ -1,9 +1,10 @@
 import DashboardCard from "./DashboardCard";
+import DisplayBaseCards from "./DisplayBaseCards";
 
 const HomeDashboard = () => {
   return (
-    <div className="flex flex-auto flex-col bg-[#f8fafc] px-12 py-8">
-      <p className="text-[1.75rem] font-semibold pb-6">Home</p>
+    <div className="flex flex-auto flex-col gap-6 bg-[#f8fafc] px-12 py-8">
+      <p className="text-[1.75rem] font-semibold">Home</p>
       <div className="flex flex-wrap gap-4">
         <DashboardCard
           heading="Start with AI"
@@ -69,6 +70,72 @@ const HomeDashboard = () => {
             ></use>
           </svg>
         </DashboardCard>
+      </div>
+      <div className="sorting flex items-center justify-between">
+        <div className="left flex items-center gap-2">
+          <div className="dropdown flex items-center gap-1">
+            <p className="text-sm opacity-70">Opened by you</p>
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 16 16"
+              className="icon flex-none opacity-70"
+            >
+              <use
+                fill="currentColor"
+                href="/icons/icon_definitions.svg?v=68b23d569e0a0c2f5529fd9b824929e7#ChevronDown"
+              ></use>
+            </svg>
+          </div>
+          <div className="dropdown flex items-center gap-1">
+            <p className="text-sm opacity-70">Show all types</p>
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 16 16"
+              className="icon flex-none opacity-70"
+            >
+              <use
+                fill="currentColor"
+                href="/icons/icon_definitions.svg?v=68b23d569e0a0c2f5529fd9b824929e7#ChevronDown"
+              ></use>
+            </svg>
+          </div>
+        </div>
+        <div className="right flex items-center" role="radiogroup">
+          <div role="radio" className="cursor-pointer p-1">
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 16 16"
+              className="icon flex-none"
+            >
+              <use
+                fill="currentColor"
+                href="/icons/icon_definitions.svg?v=68b23d569e0a0c2f5529fd9b824929e7#List"
+              ></use>
+            </svg>
+          </div>
+          <div role="radio" className="cursor-pointer p-1">
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 16 16"
+              className="icon flex-none"
+            >
+              <use
+                fill="currentColor"
+                href="/icons/icon_definitions.svg?v=68b23d569e0a0c2f5529fd9b824929e7#GridFour"
+              ></use>
+            </svg>
+          </div>
+        </div>
+      </div>
+      <div className="flex flex-col gap-2">
+        <p className="opacity-70 text-sm">Today</p>
+        <div className="flex flex-wrap gap-4">
+          <DisplayBaseCards />
+        </div>
       </div>
     </div>
   );
