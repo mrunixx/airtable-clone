@@ -15,7 +15,7 @@ const DisplayBaseCards = () => {
       setBases(bases);
     }
 
-    getBases();
+    void getBases();
   }, [])
 
   return <>
