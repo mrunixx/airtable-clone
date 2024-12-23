@@ -1,5 +1,7 @@
 import { useState } from "react";
 import SideBarDropdown from "./SideBarDropdown";
+import { api } from "~/trpc/react";
+import { redirect } from "next/navigation";
 
 type Props = {
   openSidebar: boolean;
@@ -9,9 +11,11 @@ const HomeSideBar = ({ openSidebar }: Props) => {
   const [isHover, setIsHover] = useState<boolean>(false);
   const handleMouseEnter = () => setIsHover(true);
   const handleMouseLeave = () => setIsHover(false);
+  const createBaseMutation = api.base.create.useMutation();
 
-  const handleCreateBaseScratch = () => {
-    
+  const handleCreateBaseScratch = async () => {
+    const data = await createBaseMutation.mutateAsync({ name: "Untitled base" });
+    redirect(`/${data.id}`);
   }
 
   return (

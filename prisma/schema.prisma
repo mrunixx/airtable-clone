@@ -80,5 +80,5 @@ model Base {
     createdAt   DateTime @default(now())
     createdBy   User @relation(fields: [createdById], references: [id])
     createdById String
-    starred     Boolean
+    starred     Boolean @default(false)
 }
