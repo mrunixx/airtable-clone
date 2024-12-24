@@ -1,22 +1,26 @@
 import { z } from "zod";
 
 import {
+  createCallerFactory,
   createTRPCRouter,
   protectedProcedure,
-  publicProcedure,
 } from "~/server/api/trpc";
+import { createCaller } from "../root";
 
 export const baseRouter = createTRPCRouter({
   create: protectedProcedure
     .input(z.object({ name: z.string().min(1) }))
     .mutation(async ({ ctx, input }) => {
-      return ctx.db.base.create({
+      const base = await ctx.db.base.create({
         data: {
           name: input.name,
           createdBy: { connect: { id: ctx.session.user.id } },
           starred: false,
         },
       });
+      const caller = createCaller(ctx);
+      await caller.table.createDefaultTable({baseId: base.id, name: "table 1"});
+      return base;
     }),
 
   getBase: protectedProcedure
