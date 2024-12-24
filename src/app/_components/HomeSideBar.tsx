@@ -14,12 +14,19 @@ const HomeSideBar = ({ openSidebar }: Props) => {
   const createBaseMutation = api.base.create.useMutation();
 
   const handleCreateBaseScratch = async () => {
-    const data = await createBaseMutation.mutateAsync({ name: "Untitled base" });
-    redirect(`/${data.id}`);
-  }
+    const base = await createBaseMutation.mutateAsync({
+      name: "Untitled Base",
+    });
+    // add the default table
+    redirect(`/${base.id}`);
+  };
 
   return (
-    <div onMouseLeave={handleMouseLeave} onMouseOver={handleMouseEnter} className="flex">
+    <div
+      onMouseLeave={handleMouseLeave}
+      onMouseOver={handleMouseEnter}
+      className="flex"
+    >
       {openSidebar || isHover ? (
         <div className="sidebar flex w-[300px] min-w-[300px] flex-col border-r-[1px] p-3">
           <div className="dropdowns">
@@ -33,7 +40,10 @@ const HomeSideBar = ({ openSidebar }: Props) => {
           <div className="mt-auto flex flex-col gap-3">
             <hr />
             <div className="flex flex-col text-sm font-light">
-              <div className="flex items-center gap-1 hover:bg-gray-100 p-2" role="button">
+              <div
+                className="flex items-center gap-1 p-2 hover:bg-gray-100"
+                role="button"
+              >
                 <svg
                   width="16"
                   height="16"
@@ -47,7 +57,10 @@ const HomeSideBar = ({ openSidebar }: Props) => {
                 </svg>
                 <p>Template and apps</p>
               </div>
-              <div className="flex items-center gap-1 hover:bg-gray-100 p-2" role="button">
+              <div
+                className="flex items-center gap-1 p-2 hover:bg-gray-100"
+                role="button"
+              >
                 <svg
                   width="16"
                   height="16"
@@ -61,7 +74,10 @@ const HomeSideBar = ({ openSidebar }: Props) => {
                 </svg>
                 <p>Marketplace</p>
               </div>
-              <div className="flex items-center gap-1 hover:bg-gray-100 p-2" role="button">
+              <div
+                className="flex items-center gap-1 p-2 hover:bg-gray-100"
+                role="button"
+              >
                 <svg
                   width="16"
                   height="16"
@@ -76,7 +92,8 @@ const HomeSideBar = ({ openSidebar }: Props) => {
                 <p>Import</p>
               </div>
             </div>
-            <button className="mb-2 mt-auto flex h-[32px] w-full items-center justify-center gap-2 rounded-md bg-[#1f70dc] text-sm text-white"
+            <button
+              className="mb-2 mt-auto flex h-[32px] w-full items-center justify-center gap-2 rounded-md bg-[#1f70dc] text-sm text-white"
               onClick={handleCreateBaseScratch}
             >
               <svg
