@@ -21,7 +21,7 @@ export const baseRouter = createTRPCRouter({
 
   getBase: protectedProcedure
     .input(z.object({ id: z.string().min(1) }))
-    .mutation(async ({ ctx, input }) => {
+    .query(async ({ ctx, input }) => {
       return ctx.db.base.findUnique({
         where: {
           id: input.id,
@@ -30,19 +30,12 @@ export const baseRouter = createTRPCRouter({
     }),
 
   getBases: protectedProcedure
-    .mutation(async ({ ctx }) => {
+    .query(async ({ ctx }) => {
       return ctx.db.base
         .findMany({
           where: {
             createdBy: ctx.session.user,
           },
         })
-        // .then((data) => {
-        //   return data.map(({ name, createdAt, starred }) => ({
-        //     name,
-        //     createdAt,
-        //     starred,
-        //   }));
-        // });
     }),
 });
