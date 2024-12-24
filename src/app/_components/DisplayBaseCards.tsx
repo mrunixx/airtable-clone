@@ -1,27 +1,25 @@
-import { Base } from "@prisma/client";
-import { useEffect, useState } from "react";
 import { api } from "~/trpc/react";
 import BaseCard from "./BaseCard";
+import Loading from "./Loading";
 
 const DisplayBaseCards = () => {
-  const [bases, setBases] = useState<Base[]>([]);
-  const getBasesMutation = api.base.getBases.useMutation();
+  const { data: bases, isLoading: isLoading, error: basesError } = api.base.getBases.useQuery();
 
-  useEffect(() => {
+  if (isLoading) {
+    return <Loading />
+  }
 
-    const getBases = async () => {
-      const bases = await getBasesMutation.mutateAsync();
-      setBases(bases);
-    }
+  if (basesError || !bases) {
+    return <></>
+  }
 
-    void getBases();
-  }, [])
-
-  return <>
-    {bases.map((base, index) => {
-      return <BaseCard key={index} name={base.name} baseId={base.id}/>
-    })} 
-  </>
+  return (
+    <>
+      {bases.map((base, index) => {
+        return <BaseCard key={index} name={base.name} baseId={base.id} />;
+      })}
+    </>
+  );
 };
 
 export default DisplayBaseCards;
