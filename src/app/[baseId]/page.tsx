@@ -34,7 +34,7 @@ const BasePage = () => {
         <BaseNavBar baseName={base?.name} />
         <BaseToolBar />
         <TableToolBar />
-        <Table base={base} tableId={currentTableId} />
+        <Table base={base} tableId={currentTableId ?? ""} />
       </div>
     </>
   );

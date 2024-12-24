@@ -11,15 +11,7 @@ import Loading from "./Loading";
 
 type Props = {
   base: Base;
-  tableId: string | undefined;
-};
-
-type Field = {
-  name: string;
-};
-
-type DynamicRowData<T extends Field[]> = {
-  [K in T[number]["name"]]: string;
+  tableId: string;
 };
 
 const createRowData = (records: RecordValue[][] | undefined) => {
@@ -36,24 +28,19 @@ const createRowData = (records: RecordValue[][] | undefined) => {
 }
 
 const Table = ({ base, tableId }: Props) => {
-  if (!tableId) {
-    // provide generic table
-    return <>no tableId</>;
-  }
-
   const { data: fields, isLoading: isBaseLoading } =
     api.table.getTableHeaders.useQuery({ tableId: tableId });
 
   const { data: records, isLoading: isRecordsLoading } =
     api.table.getTableRecords.useQuery({ tableId: tableId });
 
-  const colDefs: ColumnDef<DynamicRowData<Field[]>>[] =
+  const colDefs: ColumnDef<Record<string, string>>[] =
     fields?.map((f) => ({
       header: ({ column }) => <TableHeader header={f.name} index={column.id} />,
       accessorKey: f.id,
-    })) || [];
+    })) ?? [];
 
-  const tableInstance = useReactTable<DynamicRowData<Field[]>>({
+  const tableInstance = useReactTable<Record<string, string>>({
     data: createRowData(records),
     columns: colDefs,
     getCoreRowModel: getCoreRowModel(),
