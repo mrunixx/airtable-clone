@@ -95,6 +95,7 @@ model Table {
 
 model Record {
     id          String @id @default(cuid())
+    rowIndex    Int
     cellValues  RecordValue[]
     table       Table @relation(fields: [tableId], references: [id])
     tableId     String 
