@@ -1,14 +1,11 @@
 "use client";
 
-import { Base } from "@prisma/client";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
 import { api } from "~/trpc/react";
 import BaseNavBar from "../_components/BaseNavBar";
 import BaseToolBar from "../_components/BaseToolBar";
 import Table from "../_components/Table";
 import TableToolBar from "../_components/TableToolBar";
-import { table } from "console";
 import Loading from "../_components/Loading";
 
 const BasePage = () => {
