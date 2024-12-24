@@ -63,7 +63,7 @@ model User {
     accounts      Account[]
     sessions      Session[]
     posts         Post[]
-    Base          Base[]
+    bases         Base[]
 }
 
 model VerificationToken {
@@ -81,4 +81,38 @@ model Base {
     createdBy   User @relation(fields: [createdById], references: [id])
     createdById String
     starred     Boolean @default(false)
+    tables      Table[]
+}
+
+model Table {
+    id          String @id @default(cuid())
+    name        String 
+    base        Base @relation(fields: [baseId], references: [id])
+    baseId      String
+    fields      Field[]
+    records     Record[]
+}
+
+model Record {
+    id          String @id @default(cuid())
+    cellValues  RecordValue[]
+    table       Table @relation(fields: [tableId], references: [id])
+    tableId     String 
+}
+
+model Field {
+    id          String @id @default(cuid())
+    name        String
+    table       Table @relation(fields: [tableId], references: [id])
+    cellValues  RecordValue[]
+    tableId     String
+}
+
+model RecordValue {
+    id          String @id @default(cuid())
+    data        String
+    record      Record @relation(fields: [recordId], references: [id])
+    recordId    String 
+    field       Field @relation(fields: [fieldId], references: [id])
+    fieldId     String
 }
