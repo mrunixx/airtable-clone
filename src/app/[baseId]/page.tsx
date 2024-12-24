@@ -7,36 +7,35 @@ import { api } from "~/trpc/react";
 import BaseNavBar from "../_components/BaseNavBar";
 import BaseToolBar from "../_components/BaseToolBar";
 import Table from "../_components/Table";
+import TableToolBar from "../_components/TableToolBar";
+import { table } from "console";
+import Loading from "../_components/Loading";
 
 const BasePage = () => {
-  const baseId = usePathname();
-  const [loading, setLoading] = useState(true);
-  const [base, setBase] = useState<Base | null>(null);
-  const getBaseMutation = api.base.getBase.useMutation();
-  useEffect(() => {
-    setLoading(true);
-    const getBase = async () => {
-      const base = await getBaseMutation.mutateAsync({ id: baseId.slice(1) });
-      setBase(base);
-      setLoading(false);
-    };
+  const baseId = usePathname()?.slice(1);
 
-    void getBase();
-  }, [baseId]);
+  const { data: base, isLoading: isBaseLoading } = api.base.getBase.useQuery(
+    { id: baseId },
+    { enabled: !!baseId },
+  );
+
+  const { data: tables, isLoading: isTablesLoading } =
+    api.table.getTables.useQuery({ baseId: baseId }, { enabled: !!baseId });
+
+  const currentTableId = tables?.[0]?.id;
+
+  if (isBaseLoading || isTablesLoading || !base) {
+    return <Loading />;
+  }
 
   return (
     <>
-      {loading ? (
-        <div className="w-full min-h-screen flex justify-center items-center">
-          <div className="loader"></div>
-        </div>
-      ) : (
-        <div className="w-full min-h-screen">
-          <BaseNavBar baseName={base?.name}/>
-          <BaseToolBar />
-          <Table base={base}/>
-        </div>
-      )}
+      <div className="min-h-screen w-full">
+        <BaseNavBar baseName={base?.name} />
+        <BaseToolBar />
+        <TableToolBar />
+        <Table base={base} tableId={currentTableId} />
+      </div>
     </>
   );
 };
