@@ -8,6 +8,7 @@ import {
 import TableHeader from "./TableHeader";
 import { api } from "~/trpc/react";
 import Loading from "./Loading";
+import { useMemo } from "react";
 
 type Props = {
   base: Base;
@@ -34,14 +35,17 @@ const Table = ({ base, tableId }: Props) => {
   const { data: records, isLoading: isRecordsLoading } =
     api.table.getTableRecords.useQuery({ tableId: tableId });
 
-  const colDefs: ColumnDef<Record<string, string>>[] =
-    fields?.map((f) => ({
+  const colDefs: ColumnDef<Record<string, string>>[] = useMemo(() => {
+    return fields?.map((f) => ({
       header: ({ column }) => <TableHeader header={f.name} index={column.id} />,
       accessorKey: f.id,
     })) ?? [];
+  }, [fields])
+
+  const rowData = useMemo(() => createRowData(records), [records]);
 
   const tableInstance = useReactTable<Record<string, string>>({
-    data: createRowData(records),
+    data: rowData,
     columns: colDefs,
     getCoreRowModel: getCoreRowModel(),
   });
