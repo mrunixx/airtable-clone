@@ -1,12 +1,9 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import CreateOptionButton from "./CreateOptionButton";
 
 const SidebarCreate = () => {
   const [open, setOpen] = useState(true);
 
-  useEffect(() => {
-    console.log("hello")
-  }, [])
 
   return (
     <div className={`mx-4 ${open ? "mb-4" : ""} mt-auto flex flex-col border-t`}>

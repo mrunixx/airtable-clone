@@ -55,15 +55,15 @@ const Table = ({ base, tableId }: Props) => {
   }
 
   return (
-    <div className="w-full">
-      <table className="table-auto border-collapse border border-gray-300">
+    <div className="w-full border-t border-l border-gray-300">
+      <table className="table-auto border-collapse border-gray-300">
         <thead className="bg-gray-100">
           {tableInstance.getHeaderGroups().map((headerGroup) => (
             <tr key={headerGroup.id}>
               {headerGroup.headers.map((header) => (
                 <th
                   key={header.id}
-                  className="h-8 w-[180px] border border-gray-300 bg-[#f4f4f4] text-left text-[13px] font-normal text-black"
+                  className="h-8 w-[180px] border-r border-b border-gray-300 bg-[#f4f4f4] text-left text-[13px] font-normal text-black"
                 >
                   {header.isPlaceholder
                     ? null
@@ -80,12 +80,12 @@ const Table = ({ base, tableId }: Props) => {
           {tableInstance.getRowModel().rows.map((row) => (
             <tr
               key={row.id}
-              className="border border-gray-300 hover:bg-gray-50"
+              className="border-r border-b border-gray-300 hover:bg-gray-50"
             >
               {row.getVisibleCells().map((cell) => (
                 <td
                   key={cell.id}
-                  className="h-8 w-[180px] border border-gray-300 text-left text-[13px]"
+                  className="h-8 w-[180px] border-r border-b border-gray-300 bg-white text-left text-[13px]"
                 >
                   {flexRender(cell.column.columnDef.cell, cell.getContext())}
                 </td>

@@ -1,5 +1,3 @@
-import { useState } from "react";
-
 const SideViewSearch = () => {
 
   return <div className="flex items-center mx-4 border-b focus-within:border-b-blue-500 text-[0.80rem] font-light">

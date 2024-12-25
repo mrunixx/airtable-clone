@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import Image from "next/image";
 import HomeSearchBar from "./HomeSearchBar";
 import Link from "next/link";
