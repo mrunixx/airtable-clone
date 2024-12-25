@@ -113,7 +113,7 @@ const Table = ({ base, tableId }: Props) => {
             </tr>
           </tbody>
         </table>
-        <div className="flex w-[238px] flex-grow border-r border-gray-300 bg-white">
+        <div className="flex w-[240px] flex-grow border-r border-gray-300 bg-white">
           <div className="mt-auto h-[34px] w-full border-t px-2 pt-1 text-xs font-light">
             {tableInstance.getRowModel().rows.length} records
           </div>
