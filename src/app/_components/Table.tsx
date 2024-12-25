@@ -67,7 +67,7 @@ const Table = ({ base, tableId }: Props) => {
 
   const handleAddRecord = () => {
     if (records) {
-      createTableRecordMutation
+      void createTableRecordMutation
         .mutateAsync({ tableId: tableId, rowIndex: records.length })
         .then((res) => {
           const newRecords = [...(tableRecords ?? [])]; 
