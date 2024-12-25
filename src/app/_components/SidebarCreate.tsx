@@ -121,7 +121,7 @@ const SidebarCreate = () => {
                 ></use>
               </svg>
             </CreateOptionButton>
-            <CreateOptionButton title="New section" children="" />
+            <CreateOptionButton title="New section" />
           </div>
           <div className="form-btn border-t pt-2 mt-2">
             <CreateOptionButton title="Form">

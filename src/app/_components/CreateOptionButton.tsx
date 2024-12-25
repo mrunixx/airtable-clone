@@ -1,13 +1,13 @@
 type Props = {
   title: string;
-  children: React.ReactNode | undefined;
+  children?: React.ReactNode;
 };
 
 const CreateOptionButton = ({ title, children }: Props) => {
   return (
     <div tabIndex={0} role="button" className="flex px-3 h-8 items-center w-full hover:bg-[#f1f1f2]">
       {children}
-      <div className={`text-sm ${children === "" ? "mr-2" : "mx-2"}`}>{title}</div>
+      <div className={`text-sm ${children ? "mx-2" : "mr-2"}`}>{title}</div>
       <svg
         width="16"
         height="16"
