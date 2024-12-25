@@ -1,4 +1,5 @@
-import { z } from "zod";
+import { RecordValue } from "@prisma/client";
+import { undefined, z } from "zod";
 
 import {
   createTRPCRouter,
@@ -66,14 +67,36 @@ export const tableRouter = createTRPCRouter({
       });
     }),
   createTableRecord: protectedProcedure
-    .input(z.object({ tableId: z.string().min(1), rowIndex: z.number().int() }))
+    .input(z.object({ tableId: z.string().min(1), rowIndex: z.number().int()}))
     .mutation(async ({ ctx, input }) => {
-      return ctx.db.record.create({
+      const record = await ctx.db.record.create({
         data: {
           rowIndex: input.rowIndex,
           tableId: input.tableId,
         },
       });
+
+      const fields = await ctx.db.field.findMany({
+        where: {
+          tableId: input.tableId,
+        },
+      });
+
+      const recordValues: RecordValue[] = [];
+      fields.forEach(async (f) => {
+        recordValues.push(
+          await ctx.db.recordValue.create({
+            data: {
+              recordId: record.id,
+              fieldId: f.id,
+              data: "",
+            },
+          }));
+      });
+
+      await Promise.all(recordValues);
+
+      return recordValues;
     }),
   createRecordValue: protectedProcedure
     .input(
