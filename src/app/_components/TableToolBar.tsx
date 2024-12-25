@@ -109,7 +109,7 @@ const TableToolBar = () => {
         >
           <use
             fill="currentColor"
-            href="/icons/icon_definitions.svg?v=68b23d569e0a0c2f5529fd9b824929e7#ArrowsDownUp"
+            href="/icons/icon_definitions.svg?v=68b23d569e0a0c2f5529fd9b824929e7#Group"
           ></use>
         </svg>
         <p className="ml-1 p-0 text-[14px] leading-[18px] text-[#212123] font-light">
@@ -128,7 +128,7 @@ const TableToolBar = () => {
         >
           <use
             fill="currentColor"
-            href="/icons/icon_definitions.svg?v=68b23d569e0a0c2f5529fd9b824929e7#Group"
+            href="/icons/icon_definitions.svg?v=68b23d569e0a0c2f5529fd9b824929e7#ArrowsDownUp"
           ></use>
         </svg>
         <p className="ml-1 p-0 text-[14px] leading-[18px] text-[#212123] font-light">

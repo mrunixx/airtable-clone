@@ -5,14 +5,14 @@ type Props = {
 
 const TableHeader = ({ header, index }: Props) => {
   return (
-    <div className="flex w-full items-center gap-1 px-1">
+    <div className="flex w-full items-center gap-1 pr-1 pl-[7px]">
       {index === "0" ? (
         <div className="flex items-center">
           <input
             type="checkbox"
             name="select"
             id="select-all"
-            className="mr-10"
+            className="mr-10 h-3 w-3"
           />
           <svg
             width="16"
