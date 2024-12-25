@@ -9,6 +9,7 @@ import TableHeader from "./TableHeader";
 import { api } from "~/trpc/react";
 import Loading from "./Loading";
 import { useEffect, useMemo, useState } from "react";
+import NewFieldDialog from "./NewFieldDialog";
 
 type Props = {
   base: Base;
@@ -30,6 +31,7 @@ const createRowData = (records: RecordValue[][] | undefined) => {
 
 const Table = ({ base, tableId }: Props) => {
   const createTableRecordMutation = api.table.createTableRecord.useMutation();
+  const createTableFieldMutation = api.table.createTableField.useMutation();
 
   const { data: fields, isLoading: isBaseLoading } =
     api.table.getTableHeaders.useQuery({ tableId: tableId });
@@ -66,16 +68,25 @@ const Table = ({ base, tableId }: Props) => {
   });
 
   const handleAddRecord = () => {
-    if (records) {
+    if (tableRecords) {
       void createTableRecordMutation
-        .mutateAsync({ tableId: tableId, rowIndex: records.length })
+        .mutateAsync({ tableId: tableId, rowIndex: tableRecords.length })
         .then((res) => {
-          const newRecords = [...(tableRecords ?? [])]; 
+          const newRecords = [...(tableRecords ?? [])];
           newRecords.push(res);
 
           setTableRecords(newRecords);
         });
     }
+  };
+
+  const handleAddField = (input: string) => {
+    void createTableFieldMutation.mutateAsync({ name: input, tableId: tableId})
+      .then((res) => {
+        const newFields = [...tableFields ?? []];
+        newFields.push(res);
+        setTableFields(newFields);
+      })
   };
 
   if (isBaseLoading || isRecordsLoading) {
@@ -150,19 +161,7 @@ const Table = ({ base, tableId }: Props) => {
         </div>
       </div>
       <div className="flex h-[33px] flex-grow flex-col border-b border-gray-300 bg-white">
-        <div className="add-col flex h-[33px] w-[94px] cursor-pointer items-center justify-center border-r border-gray-300 bg-[#f4f4f4]">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="16"
-            height="16"
-            viewBox="0 0 16 16"
-          >
-            <use
-              fill="currentColor"
-              href="/icons/icon_definitions.svg?v=68b23d569e0a0c2f5529fd9b824929e7#Plus"
-            ></use>
-          </svg>
-        </div>
+        <NewFieldDialog handleClick={handleAddField}/>
       </div>
     </div>
   );

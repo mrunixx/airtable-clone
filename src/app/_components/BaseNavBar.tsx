@@ -48,7 +48,7 @@ const BaseNavBar = ({ baseName }: Props) => {
         </div>
         <div className="nav-options flex items-center gap-3">
           <BaseNavigationOptionButton className="bg-red-dusty-dark shadow-inner">Data</BaseNavigationOptionButton>
-          <BaseNavigationOptionButton className="">Automation</BaseNavigationOptionButton>
+          <BaseNavigationOptionButton className="">Automations</BaseNavigationOptionButton>
           <BaseNavigationOptionButton className="">Interfaces</BaseNavigationOptionButton>
           <div className="h-[20px] border-l opacity-20"></div>
           <BaseNavigationOptionButton className="">Forms</BaseNavigationOptionButton>
