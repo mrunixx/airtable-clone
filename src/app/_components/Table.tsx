@@ -51,7 +51,7 @@ const Table = ({ base, tableId }: Props) => {
   }
 
   return (
-    <div className="">
+    <div className="w-full">
       <table className="table-auto border-collapse border border-gray-300">
         <thead className="bg-gray-100">
           {tableInstance.getHeaderGroups().map((headerGroup) => (

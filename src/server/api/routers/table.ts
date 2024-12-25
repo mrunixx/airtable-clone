@@ -130,7 +130,7 @@ export const tableRouter = createTRPCRouter({
               data: {
                 recordId: record.id,
                 fieldId: field.id,
-                data: "", 
+                data: "",
               },
             }),
           );

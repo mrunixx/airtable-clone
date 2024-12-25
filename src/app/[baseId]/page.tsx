@@ -7,6 +7,7 @@ import BaseToolBar from "../_components/BaseToolBar";
 import Table from "../_components/Table";
 import TableToolBar from "../_components/TableToolBar";
 import Loading from "../_components/Loading";
+import BaseSidebar from "../_components/BaseSidebar";
 
 const BasePage = () => {
   const baseId = usePathname()?.slice(1);
@@ -27,11 +28,14 @@ const BasePage = () => {
 
   return (
     <>
-      <div className="min-h-screen w-full">
+      <div className="min-h-screen w-full flex flex-col">
         <BaseNavBar baseName={base?.name} />
         <BaseToolBar />
         <TableToolBar />
-        <Table base={base} tableId={currentTableId ?? ""} />
+        <div className="flex flex-grow bg-[#f8f8f8] h-full">
+          <BaseSidebar />
+          <Table base={base} tableId={currentTableId ?? ""} />
+        </div>
       </div>
     </>
   );
