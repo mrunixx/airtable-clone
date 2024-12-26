@@ -32,7 +32,7 @@ const Table = ({ base, tableId }: Props) => {
     isLoading: isRecordsLoading,
     refetch,
   } = api.table.getTableRecordValues.useQuery({ tableId: tableId });
-  const [tableRecords, setTableRecords] = useState(records || []);
+  const [tableRecords, setTableRecords] = useState(records ?? []);
 
   useEffect(() => {
     if (fields) {
@@ -48,7 +48,7 @@ const Table = ({ base, tableId }: Props) => {
   }, [fields, records]);
 
   const transformedData = useMemo(() => {
-    const grouped: Record<string, Record<string, any>> = {};
+    const grouped: Record<string, Record<string, string>> = {};
 
     tableRecords.forEach((record) => {
       const { recordId, fieldId, data } = record;
@@ -109,7 +109,7 @@ const Table = ({ base, tableId }: Props) => {
       .then((res) => {
         const newFields = [...(tableFields ?? [])];
         newFields.push(res);
-        refetch().then(() => {
+        void refetch().then(() => {
           setTableFields(newFields);
         });
       });
@@ -142,13 +142,13 @@ const Table = ({ base, tableId }: Props) => {
               return (
                 <>
                   {colIndex === 0 && (
-                    <div className="flex w-[66px] items-center bg-transparent pr-[35px]">
+                    <div className="flex w-[66px] items-center bg-transparent pr-[35px]" key={index}>
                       <p className="ml-[5px] h-4 w-4 text-center text-xs text-gray-500">
                         {index + 1}
                       </p>
                     </div>
                   )}
-                  {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
                 </>
               );
             })}
