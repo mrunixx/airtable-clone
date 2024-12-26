@@ -240,7 +240,7 @@ export const tableRouter = createTRPCRouter({
         return await prisma.recordValue.createMany({
           data: recordValuesData,
         });
-      }, {timeout: 10000})
+      }, {timeout: 60000})
       return result;
     }),
 });
