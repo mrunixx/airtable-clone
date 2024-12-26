@@ -5,9 +5,10 @@ type Props = {
   fieldId: string;
   recordId?: string | undefined;
   data?: string | undefined;
+  rowIndex?: string | undefined;
 };
 
-const TableCell = ({ fieldId, recordId, data }: Props) => {
+const TableCell = ({ fieldId, recordId, data, rowIndex }: Props) => {
   const [input, setInput] = useState(data ?? "");
   const [initialInput, setInitialInput] = useState(data ?? "");
   const [isEditable, setIsEditable] = useState(false);
@@ -20,6 +21,7 @@ const TableCell = ({ fieldId, recordId, data }: Props) => {
       if (recordId) {
         void cellMutation.mutateAsync({ data: input, fieldId: fieldId, recordId: recordId })
       }
+      console.log("input saved at: ", fieldId, recordId);
     }
     setIsEditable(false);
   };

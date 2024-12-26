@@ -5,7 +5,7 @@ type Props = {
 
 const NewRecordButton = ({ children } : Props) => {
   return (
-    <div className="flex items-center h-8 border-r border-gray-300 w-[248px]">
+    <div className="flex items-center h-8 border-r border-gray-300 w-[242px]">
       <svg
         width="16"
         height="16"

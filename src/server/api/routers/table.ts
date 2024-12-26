@@ -40,13 +40,20 @@ export const tableRouter = createTRPCRouter({
   getTableRecordValues: protectedProcedure
     .input(z.object({ tableId: z.string().min(1) }))
     .query(async ({ ctx, input }) => {
-      return await ctx.db.recordValue.findMany({
+      const val = await ctx.db.recordValue.findMany({
         where: {
           record: {
             tableId: input.tableId,
           },
         },
+        orderBy: {
+          record: {
+            rowIndex: 'asc'
+          }
+        }
       });
+
+      return val;
     }),
   createTableField: protectedProcedure
     .input(z.object({ tableId: z.string().min(1), name: z.string().min(1) }))
@@ -218,8 +225,10 @@ export const tableRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       const { tableId, fieldIds } = input;
 
+      const currentMax = await ctx.db.record.count({where: {tableId: tableId}}) 
       const records = Array.from({ length: 15000 }, (_, i) => ({
         id: `${tableId}-record-${i}`, 
+        rowIndex: i + currentMax,
         tableId: tableId,
       }));
 

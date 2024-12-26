@@ -28,13 +28,13 @@ const BasePage = () => {
 
   return (
     <>
-      <div className="min-h-screen w-full flex flex-col">
+      <div className="min-h-screen h-screen w-full flex flex-col overflow-hidden">
         <BaseNavBar baseName={base?.name} />
         <BaseToolBar />
         <TableToolBar />
-        <div className="flex flex-grow bg-[#f8f8f8] h-full">
+        <div className="flex flex-grow overflow-hidden bg-[#f8f8f8] h-full">
           <BaseSidebar />
-          <Table base={base} tableId={currentTableId ?? ""}/>
+          <Table tableId={currentTableId ?? ""}/>
         </div>
       </div>
     </>
