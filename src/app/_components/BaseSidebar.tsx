@@ -3,7 +3,7 @@ import SideViewSearch from "./SideViewSearch";
 
 const BaseSidebar = () => {
   return (
-    <div className="flex w-[260px] min-w-[260px] flex-col bg-white border-t">
+    <div className="flex w-[260px] min-w-[260px] flex-col bg-white border-t pt-2">
       <SideViewSearch />
       <div className="curr-view mx-4 mt-2 bg-[#d5f1ff] rounded-sm flex">
         <div

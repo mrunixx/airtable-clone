@@ -26,12 +26,18 @@ const Table = ({ tableId }: Props) => {
   const createBatchTableRecordMutation =
     api.table.create15000Records.useMutation();
   const { data: fields, isLoading: isBaseLoading } =
-    api.table.getTableHeaders.useQuery({ tableId: tableId }, {refetchOnWindowFocus: false, placeholderData: keepPreviousData});
+    api.table.getTableHeaders.useQuery(
+      { tableId: tableId },
+      { refetchOnWindowFocus: false, placeholderData: keepPreviousData },
+    );
   const {
     data: records,
     isLoading: isRecordsLoading,
     refetch,
-  } = api.table.getTableRecordValues.useQuery({ tableId: tableId }, {refetchOnWindowFocus: false, placeholderData: keepPreviousData});
+  } = api.table.getTableRecordValues.useQuery(
+    { tableId: tableId },
+    { refetchOnWindowFocus: false, placeholderData: keepPreviousData },
+  );
 
   const [tableFields, setTableFields] = useState(fields);
   const [tableReady, setTableReady] = useState(false);
@@ -74,12 +80,11 @@ const Table = ({ tableId }: Props) => {
     );
   }, [tableFields]);
 
-
   const handleAddRecord = () => {
     if (tableRecords && clickable) {
-      setClickable(false)
+      setClickable(false);
       void createTableRecordMutation
-        .mutateAsync({ tableId: tableId, rowIndex: tableRecords.length})
+        .mutateAsync({ tableId: tableId, rowIndex: tableRecords.length })
         .then((res) => {
           const newRecords = [...(tableRecords ?? []), ...res];
           setTableRecords(newRecords);
@@ -173,9 +178,12 @@ const Table = ({ tableId }: Props) => {
               return headerGroup.headers.map((header, index) => {
                 {
                   return (
-                    <div key={index} className="p-0 m-0">
-                      {flexRender( header.column.columnDef.header,
-                      header.getContext())};
+                    <div key={index} className="m-0 p-0">
+                      {flexRender(
+                        header.column.columnDef.header,
+                        header.getContext(),
+                      )}
+                      ;
                     </div>
                   );
                 }
@@ -188,11 +196,9 @@ const Table = ({ tableId }: Props) => {
             <TableRow key={index}>
               {row.getVisibleCells().map((cell, colIndex) => {
                 return (
-                  <div key={cell.id} className="flex p-0 m-0">
+                  <div key={cell.id} className="m-0 flex p-0">
                     {colIndex === 0 && (
-                      <div
-                        className="flex w-[66px] items-center bg-transparent pr-[35px]"
-                      >
+                      <div className="flex w-[66px] items-center bg-transparent pr-[35px]">
                         <p className="ml-[5px] h-4 w-4 text-center text-xs text-gray-500">
                           {index + 1}
                         </p>
@@ -208,24 +214,29 @@ const Table = ({ tableId }: Props) => {
         <div
           className={`flex h-8 ${clickable ? "cursor-pointer" : "cursor-wait"} flex-col border-b border-r border-gray-300 bg-white text-left text-[13px] text-gray-500 hover:bg-gray-50`}
           onClick={handleAddRecord}
-          
         >
           <NewRecordButton />
         </div>
         <div
-          className="flex h-8 cursor-pointer flex-col border-b border-r border-gray-300 bg-white text-left text-[13px] text-red-600 hover:bg-red-600 hover:text-black"
+          className="flex h-8 cursor-pointer flex-col border-b border-r border-gray-300 bg-white text-left text-[13px] text-red-600 hover:bg-red-500 hover:text-white"
           onClick={handleAddRecordBatch}
         >
           <NewRecordButton>ADD 15000 RECORDS</NewRecordButton>
         </div>
-        <div className="flex h-full w-[242px] border-r border-gray-300 bg-white">
-          <div className="mt-auto h-[34px] w-full border-t px-2 pt-1 text-xs font-light">
-            {tableInstance.getRowModel().rows.length} records
+        <div className="flex h-full">
+          <div className="flex h-full w-[242px] border-r border-gray-300 bg-white">
+            <div className="mt-auto h-[34px] w-full border-t border-gray-300 px-2 pt-1 text-xs font-light">
+              {tableInstance.getRowModel().rows.length} records
+            </div>
           </div>
+          <div className="h-[34px] flex flex-grow self-end border-t border-gray-300 bg-white"></div>
         </div>
       </div>
-      <div className="flex h-8 w-full border-b border-gray-300 bg-white">
-        <NewFieldDialog handleClick={handleAddField} />
+      <div className="flex flex-col justify-between w-full">
+        <div className="flex h-8 w-full border-b border-gray-300 bg-white">
+          <NewFieldDialog handleClick={handleAddField} />
+        </div>
+          <div className="h-[34px] border-t border-gray-300 bg-white"></div>
       </div>
     </div>
   );
