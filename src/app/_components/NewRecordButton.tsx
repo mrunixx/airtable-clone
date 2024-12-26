@@ -1,4 +1,9 @@
-const NewRecordButton = () => {
+
+type Props = {
+  children?: React.ReactNode
+}
+
+const NewRecordButton = ({ children } : Props) => {
   return (
     <div className="flex items-center h-8 border-r border-gray-300 w-[248px]">
       <svg
@@ -12,6 +17,9 @@ const NewRecordButton = () => {
           href="/icons/icon_definitions.svg?v=68b23d569e0a0c2f5529fd9b824929e7#Plus"
         ></use>
       </svg>
+      <p className="text-red px-5">
+      {children}
+      </p>
     </div>
   );
 };

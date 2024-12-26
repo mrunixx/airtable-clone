@@ -28,10 +28,17 @@ const TableCell = ({ fieldId, recordId, data }: Props) => {
     setIsEditable(true);
   };
 
+  const handleEnter = (e: React.KeyboardEvent) => {
+    if (e.key !== "Tab") {
+      setIsEditable(true);
+    }
+  }
+
   return (
     <div
       className="h-[31px] w-full border-r border-gray-300 bg-transparent text-[13px]"
       onDoubleClick={handleDoubleClick}
+      onKeyDown={handleEnter}
     >
       <input
         type="text"

@@ -185,7 +185,7 @@ export const tableRouter = createTRPCRouter({
         table,
       };
     }),
-    updateCellValue: protectedProcedure
+  updateCellValue: protectedProcedure
     .input(
       z.object({
         recordId: z.string().min(1),
@@ -205,8 +205,41 @@ export const tableRouter = createTRPCRouter({
           data: input.data, // Update the `data` field with the provided value
         },
       });
-  
+
       return updatedRecordValue; // Return the updated record value
     }),
-    
+  create15000Records: protectedProcedure
+    .input(
+      z.object({
+        tableId: z.string().min(1), 
+        fieldIds: z.array(z.string().min(1)), 
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const { tableId, fieldIds } = input;
+
+      const records = Array.from({ length: 15000 }, (_, i) => ({
+        id: `${tableId}-record-${i}`, 
+        tableId: tableId,
+      }));
+
+      const recordValuesData = records.flatMap((record) =>
+        fieldIds.map((fieldId) => ({
+          id: `${record.id}-${fieldId}`, 
+          data: "", 
+          recordId: record.id,
+          fieldId: fieldId,
+        })),
+      );
+
+      await ctx.db.record.createMany({
+        data: records,
+      });
+
+      const recordValues = await ctx.db.recordValue.createMany({
+        data: recordValuesData,
+      });
+
+      return recordValues;
+    }),
 });

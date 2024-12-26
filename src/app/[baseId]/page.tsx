@@ -34,7 +34,7 @@ const BasePage = () => {
         <TableToolBar />
         <div className="flex flex-grow bg-[#f8f8f8] h-full">
           <BaseSidebar />
-          <Table base={base} tableId={currentTableId ?? ""} />
+          <Table base={base} tableId={currentTableId ?? ""}/>
         </div>
       </div>
     </>
