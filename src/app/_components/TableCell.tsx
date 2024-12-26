@@ -38,7 +38,7 @@ const TableCell = ({ fieldId, recordId, data, rowIndex }: Props) => {
 
   return (
     <div
-      className="h-[31px] w-full border-r border-gray-300 bg-transparent text-[13px]"
+      className="h-[31px] w-[176px] border-r border-gray-300 bg-transparent text-[13px]"
       onDoubleClick={handleDoubleClick}
       onKeyDown={handleEnter}
     >
