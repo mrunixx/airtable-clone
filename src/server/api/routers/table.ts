@@ -37,24 +37,16 @@ export const tableRouter = createTRPCRouter({
         },
       });
     }),
-  getTableRecords: protectedProcedure
+  getTableRecordValues: protectedProcedure
     .input(z.object({ tableId: z.string().min(1) }))
     .query(async ({ ctx, input }) => {
-      const records = await ctx.db.record.findMany({
+      return await ctx.db.recordValue.findMany({
         where: {
-          tableId: input.tableId,
+          record : {
+            tableId: input.tableId
+          }
         },
       });
-
-      return Promise.all(
-        records.map((r) => {
-          return ctx.db.recordValue.findMany({
-            where: {
-              recordId: r.id,
-            },
-          });
-        }),
-      );
     }),
   createTableField: protectedProcedure
     .input(z.object({ tableId: z.string().min(1), name: z.string().min(1) }))

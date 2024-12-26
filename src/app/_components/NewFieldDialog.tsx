@@ -26,7 +26,7 @@ export default function NewFieldDialog({ handleClick }: Props) {
   return (
     <Popover placement="bottom" showArrow={false} isOpen={isOpen} onOpenChange={handleOpenChange}>
       <PopoverTrigger>
-        <div className="add-col flex h-[33px] w-[94px] cursor-pointer items-center justify-center border-r border-gray-300 bg-[#f4f4f4]">
+        <div className="add-col flex h-8 w-[94px] cursor-pointer items-center justify-center border-r border-b border-gray-300 bg-[#f4f4f4]">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             width="16"

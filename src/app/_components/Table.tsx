@@ -10,23 +10,13 @@ import { api } from "~/trpc/react";
 import Loading from "./Loading";
 import { useEffect, useMemo, useState } from "react";
 import NewFieldDialog from "./NewFieldDialog";
+import TableCell from "./TableCell";
+import TableRow from "./TableRow";
+import NewRecordButton from "./NewRecordButton";
 
 type Props = {
   base: Base;
   tableId: string;
-};
-
-const createRowData = (records: RecordValue[][] | undefined) => {
-  const rowData: Record<string, string>[] = [];
-  records?.forEach((r) => {
-    const obj: Record<string, string> = {};
-    r.forEach((v) => {
-      obj[v.fieldId] = v.data;
-    });
-    rowData.push(obj);
-  });
-
-  return rowData;
 };
 
 const Table = ({ base, tableId }: Props) => {
@@ -37,32 +27,61 @@ const Table = ({ base, tableId }: Props) => {
     api.table.getTableHeaders.useQuery({ tableId: tableId });
 
   const { data: records, isLoading: isRecordsLoading } =
-    api.table.getTableRecords.useQuery({ tableId: tableId });
+    api.table.getTableRecordValues.useQuery({ tableId: tableId });
 
   const [tableFields, setTableFields] = useState(fields);
-  const [tableRecords, setTableRecords] = useState(records);
+  const [tableRecords, setTableRecords] = useState(records || []);
 
   useEffect(() => {
-    setTableFields(fields);
-    setTableRecords(records);
+    if (fields) {
+      setTableFields(fields);
+      console.log(
+        "TableField IDs:",
+        tableFields?.map((f) => f.id),
+      );
+    }
+    if (records) {
+      setTableRecords(records);
+    }
   }, [fields, records]);
+
+  const transformedData = useMemo(() => {
+    const grouped: Record<string, Record<string, any>> = {};
+
+    tableRecords.forEach((record) => {
+      const { recordId, fieldId, data } = record;
+      if (!grouped[recordId]) {
+        grouped[recordId] = { recordId };
+      }
+      grouped[recordId][fieldId] = data;
+    });
+
+    return Object.values(grouped);
+  }, [tableRecords]);
 
   const colDefs: ColumnDef<Record<string, string>>[] = useMemo(() => {
     return (
-      tableFields?.map((f, index) => ({
+      tableFields?.map((field, index) => ({
         header: ({ column }) => (
-          <TableHeader header={f.name} index={column.id} />
+          <TableHeader header={field.name} index={column.id} />
         ),
-        accessorKey: f.id,
         id: index.toString(),
+        accessorKey: field.id,
+        cell: ({ row }) => {
+          return (
+            <TableCell
+              fieldId={field.id}
+              data={row.original[field.id]}
+              recordId={row.original.recordId}
+            />
+          );
+        },
       })) ?? []
     );
   }, [tableFields]);
 
-  const rowData = useMemo(() => createRowData(tableRecords), [tableRecords]);
-
   const tableInstance = useReactTable<Record<string, string>>({
-    data: rowData,
+    data: transformedData,
     columns: colDefs,
     getCoreRowModel: getCoreRowModel(),
   });
@@ -73,7 +92,9 @@ const Table = ({ base, tableId }: Props) => {
         .mutateAsync({ tableId: tableId, rowIndex: tableRecords.length })
         .then((res) => {
           const newRecords = [...(tableRecords ?? [])];
-          newRecords.push(res);
+          for (const r of res) {
+            newRecords.push(r);
+          }
 
           setTableRecords(newRecords);
         });
@@ -81,12 +102,13 @@ const Table = ({ base, tableId }: Props) => {
   };
 
   const handleAddField = (input: string) => {
-    void createTableFieldMutation.mutateAsync({ name: input, tableId: tableId})
+    void createTableFieldMutation
+      .mutateAsync({ name: input, tableId: tableId })
       .then((res) => {
-        const newFields = [...tableFields ?? []];
+        const newFields = [...(tableFields ?? [])];
         newFields.push(res);
         setTableFields(newFields);
-      })
+      });
   };
 
   if (isBaseLoading || isRecordsLoading) {
@@ -96,72 +118,52 @@ const Table = ({ base, tableId }: Props) => {
   return (
     <div className="flex w-full border-l border-t border-gray-300">
       <div className="flex flex-col">
-        <table className="table-auto border-collapse border-b border-r border-white bg-white">
-          <thead className="bg-white">
-            {tableInstance.getHeaderGroups().map((headerGroup, index) => (
-              <tr key={headerGroup.id}>
-                {headerGroup.headers.map((header) => (
-                  <th
-                    key={header.id}
-                    className="h-8 w-[180px] border-b border-r border-gray-300 bg-[#f4f4f4] text-left text-[13px] font-normal text-black"
-                  >
-                    {header.isPlaceholder
-                      ? null
-                      : flexRender(
-                          header.column.columnDef.header,
-                          header.getContext(),
-                        )}
-                  </th>
-                ))}
-              </tr>
-            ))}
-          </thead>
-          <tbody>
-            {tableInstance.getRowModel().rows.map((row, rowIndex) => (
-              <tr key={row.id} className="hover:bg-gray-100">
-                {row.getVisibleCells().map((cell, colIndex) => (
-                  <td
-                    key={cell.id}
-                    className="h-8 w-[180px] border-b border-r border-gray-300 text-left text-[13px]"
-                  >
-                    {colIndex === 0 && (
+        <TableRow>
+          {tableInstance.getHeaderGroups().map((headerGroup) => {
+            {
+              return headerGroup.headers.map((header, index) => {
+                {
+                  return flexRender(
+                    header.column.columnDef.header,
+                    header.getContext(),
+                  );
+                }
+              });
+            }
+          })}
+        </TableRow>
+        {tableInstance.getRowModel().rows.map((row, index) => (
+          <TableRow key={index}>
+            {row.getVisibleCells().map((cell, colIndex) => {
+              return (
+                <>
+                  {colIndex === 0 && (
+                    <div className="flex w-[66px] items-center bg-transparent pr-[35px]">
                       <p className="ml-[5px] h-4 w-4 text-center text-xs text-gray-500">
-                        {rowIndex + 1}
+                        {index + 1}
                       </p>
-                    )}
-                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                  </td>
-                ))}
-              </tr>
-            ))}
-            <tr className="border-b border-r border-gray-300 hover:bg-gray-100">
-              <td
-                className="h-8 cursor-pointer border-b border-r border-gray-300 text-left text-[13px] text-gray-500"
-                onClick={handleAddRecord}
-              >
-                <svg
-                  width="16"
-                  height="16"
-                  viewBox="0 0 16 16"
-                  className="icon ml-[5px] flex-none"
-                >
-                  <use
-                    fill="currentColor"
-                    href="/icons/icon_definitions.svg?v=68b23d569e0a0c2f5529fd9b824929e7#Plus"
-                  ></use>
-                </svg>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-        <div className="flex w-[240px] flex-grow border-r border-gray-300 bg-white">
+                    </div>
+                  )}
+                  {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                </>
+              );
+            })}
+          </TableRow>
+        ))}
+        <div
+          className="flex h-8 cursor-pointer flex-col border-b border-r border-gray-300 bg-white text-left text-[13px] text-gray-500 hover:bg-[#f4f4f4]"
+          onClick={handleAddRecord}
+        >
+          <NewRecordButton />
+        </div>
+        <div className="h-full w-[248px] border-r border-gray-300 bg-white flex">
           <div className="mt-auto h-[34px] w-full border-t px-2 pt-1 text-xs font-light">
             {tableInstance.getRowModel().rows.length} records
           </div>
         </div>
       </div>
-      <div className="flex h-[33px] flex-grow flex-col border-b border-gray-300 bg-white">
-        <NewFieldDialog handleClick={handleAddField}/>
+      <div className="flex h-8 w-full border-b border-gray-300 bg-white">
+        <NewFieldDialog handleClick={handleAddField} />
       </div>
     </div>
   );
