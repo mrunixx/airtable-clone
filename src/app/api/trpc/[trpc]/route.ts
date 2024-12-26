@@ -9,6 +9,10 @@ import { createTRPCContext } from "~/server/api/trpc";
  * This wraps the `createTRPCContext` helper and provides the required context for the tRPC API when
  * handling a HTTP request (e.g. when you make requests from Client Components).
  */
+export const maxDuration = 20; // This function can run for a maximum of 5 seconds
+export const dynamic = 'force-dynamic';
+
+
 const createContext = async (req: NextRequest) => {
   return createTRPCContext({
     headers: req.headers,
