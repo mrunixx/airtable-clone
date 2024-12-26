@@ -117,4 +117,6 @@ model RecordValue {
     recordId    String 
     field       Field @relation(fields: [fieldId], references: [id])
     fieldId     String
+
+    @@unique([recordId, fieldId])
 }

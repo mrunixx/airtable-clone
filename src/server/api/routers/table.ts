@@ -42,9 +42,9 @@ export const tableRouter = createTRPCRouter({
     .query(async ({ ctx, input }) => {
       return await ctx.db.recordValue.findMany({
         where: {
-          record : {
-            tableId: input.tableId
-          }
+          record: {
+            tableId: input.tableId,
+          },
         },
       });
     }),
@@ -61,19 +61,22 @@ export const tableRouter = createTRPCRouter({
 
       const records = await ctx.db.record.findMany({
         where: {
-          tableId: input.tableId
-        }
-      })
+          tableId: input.tableId,
+        },
+      });
 
       const recordValues = [];
       for (const r of records) {
-        recordValues.push(async () => await ctx.db.recordValue.create({
-          data: {
-            fieldId: field.id,
-            recordId: r.id,
-            data: ""
-          }
-        }))
+        recordValues.push(
+          async () =>
+            await ctx.db.recordValue.create({
+              data: {
+                fieldId: field.id,
+                recordId: r.id,
+                data: "",
+              },
+            }),
+        );
       }
 
       await Promise.all(recordValues);
@@ -182,4 +185,28 @@ export const tableRouter = createTRPCRouter({
         table,
       };
     }),
+    updateCellValue: protectedProcedure
+    .input(
+      z.object({
+        recordId: z.string().min(1),
+        fieldId: z.string().min(1),
+        data: z.string().min(0),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const updatedRecordValue = await ctx.db.recordValue.update({
+        where: {
+          recordId_fieldId: {
+            recordId: input.recordId,
+            fieldId: input.fieldId,
+          },
+        },
+        data: {
+          data: input.data, // Update the `data` field with the provided value
+        },
+      });
+  
+      return updatedRecordValue; // Return the updated record value
+    }),
+    
 });

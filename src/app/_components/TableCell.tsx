@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { api } from "~/trpc/react";
 
 type Props = {
   fieldId: string;
@@ -7,14 +8,18 @@ type Props = {
 };
 
 const TableCell = ({ fieldId, recordId, data }: Props) => {
-  const [input, setInput] = useState(data);
-  const [initialInput, setInitialInput] = useState(data);
+  const [input, setInput] = useState(data || "");
+  const [initialInput, setInitialInput] = useState(data || "");
   const [isEditable, setIsEditable] = useState(false);
+
+  const cellMutation = api.table.updateCellValue.useMutation();
 
   const handleDbSave = () => {
     if (input !== initialInput) {
       setInitialInput(input);
-      console.log("push to db");
+      if (recordId) {
+        cellMutation.mutateAsync({ data: input, fieldId: fieldId, recordId: recordId })
+      }
     }
     setIsEditable(false);
   };

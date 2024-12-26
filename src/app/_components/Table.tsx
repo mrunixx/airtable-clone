@@ -25,11 +25,13 @@ const Table = ({ base, tableId }: Props) => {
 
   const { data: fields, isLoading: isBaseLoading } =
     api.table.getTableHeaders.useQuery({ tableId: tableId });
-
-  const { data: records, isLoading: isRecordsLoading } =
-    api.table.getTableRecordValues.useQuery({ tableId: tableId });
-
   const [tableFields, setTableFields] = useState(fields);
+
+  const {
+    data: records,
+    isLoading: isRecordsLoading,
+    refetch,
+  } = api.table.getTableRecordValues.useQuery({ tableId: tableId });
   const [tableRecords, setTableRecords] = useState(records || []);
 
   useEffect(() => {
@@ -107,7 +109,9 @@ const Table = ({ base, tableId }: Props) => {
       .then((res) => {
         const newFields = [...(tableFields ?? [])];
         newFields.push(res);
-        setTableFields(newFields);
+        refetch().then(() => {
+          setTableFields(newFields);
+        });
       });
   };
 
@@ -151,12 +155,12 @@ const Table = ({ base, tableId }: Props) => {
           </TableRow>
         ))}
         <div
-          className="flex h-8 cursor-pointer flex-col border-b border-r border-gray-300 bg-white text-left text-[13px] text-gray-500 hover:bg-[#f4f4f4]"
+          className="flex h-8 cursor-pointer flex-col border-b border-r border-gray-300 bg-white text-left text-[13px] text-gray-500 hover:bg-gray-50"
           onClick={handleAddRecord}
         >
           <NewRecordButton />
         </div>
-        <div className="h-full w-[248px] border-r border-gray-300 bg-white flex">
+        <div className="flex h-full w-[248px] border-r border-gray-300 bg-white">
           <div className="mt-auto h-[34px] w-full border-t px-2 pt-1 text-xs font-light">
             {tableInstance.getRowModel().rows.length} records
           </div>
