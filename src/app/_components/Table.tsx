@@ -99,7 +99,6 @@ const Table = ({ base, tableId }: Props) => {
 
   const handleAddRecord = () => {
     if (tableRecords) {
-      setTableReady(false);
       void createTableRecordMutation
         .mutateAsync({ tableId: tableId, rowIndex: tableRecords.length })
         .then((res) => {
@@ -109,7 +108,6 @@ const Table = ({ base, tableId }: Props) => {
           }
 
           setTableRecords(newRecords);
-          setTableReady(true);
         });
     }
   };
@@ -131,7 +129,6 @@ const Table = ({ base, tableId }: Props) => {
   };
 
   const handleAddField = (input: string) => {
-    setTableReady(false);
     void createTableFieldMutation
       .mutateAsync({ name: input, tableId: tableId })
       .then((res) => {
@@ -140,7 +137,6 @@ const Table = ({ base, tableId }: Props) => {
         void refetch().then(() => {
           setTableFields(newFields);
         });
-        setTableReady(true);
       });
   };
 

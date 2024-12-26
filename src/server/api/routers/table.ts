@@ -232,14 +232,15 @@ export const tableRouter = createTRPCRouter({
         })),
       );
 
-      await ctx.db.record.createMany({
-        data: records,
-      });
-
-      const recordValues = await ctx.db.recordValue.createMany({
-        data: recordValuesData,
-      });
-
-      return recordValues;
+      const result = await ctx.db.$transaction(async (prisma) => {
+        await prisma.record.createMany({
+          data: records,
+        });
+  
+        return await prisma.recordValue.createMany({
+          data: recordValuesData,
+        });
+      })
+      return result;
     }),
 });
