@@ -22,6 +22,8 @@ type Props = {
 };
 
 const Table = ({ tableId }: Props) => {
+  const parentRef = useRef<HTMLDivElement>(null);
+
   const createTableRecordMutation = api.table.createTableRecord.useMutation();
   const createTableFieldMutation = api.table.createTableField.useMutation();
   const createBatchTableRecordMutation =
@@ -36,7 +38,8 @@ const Table = ({ tableId }: Props) => {
     isLoading: isRecordsLoading,
     refetch,
   } = api.table.getTableRecordValues.useQuery(
-    { tableId: tableId, offset: 0, limit: 1000}
+    { tableId: tableId, offset: 0, limit: 10000 },
+    { refetchOnWindowFocus: false, placeholderData: keepPreviousData },
   );
 
   const [tableFields, setTableFields] = useState(fields);
@@ -44,16 +47,17 @@ const Table = ({ tableId }: Props) => {
   const [tableRecords, setTableRecords] = useState(records ?? []);
   const [clickable, setClickable] = useState(true);
   const [hasMore, setHasMore] = useState(true);
-  const [offset, setOffset] = useState(1000);
+  const [offset, setOffset] = useState(10000);
 
-  const { data, isLoading, isFetching } = api.table.getTableRecordValues.useQuery(
-    {
-      tableId: tableId,
-      offset: offset,
-      limit: 1000,
-    },
-    { enabled: hasMore } // Only fetch data if there's more to load
-  );
+  const { data, isLoading, isFetching } =
+    api.table.getTableRecordValues.useQuery(
+      {
+        tableId: tableId,
+        offset: offset,
+        limit: 10000,
+      },
+      { enabled: hasMore },
+    );
 
   const transformedData = useMemo(() => {
     const grouped: Record<string, Record<string, string>> = {};
@@ -105,7 +109,6 @@ const Table = ({ tableId }: Props) => {
           setClickable(true);
         });
     }
-    console.log(tableId);
   };
 
   const handleAddRecordBatch = async () => {
@@ -113,7 +116,7 @@ const Table = ({ tableId }: Props) => {
     const recordValuesToAdd: RecordValue[] = [];
 
     tableFields?.forEach((tf) => {
-      for (let i = 0; i < 15000; i++) {
+      for (let i = (tableRecords.length / colDefs.length); i < 250; i++) {
         const recordId = `${tableId}-record-${i}`;
         const recordValueObj = {
           id: `${recordId}-${tf.id}`,
@@ -162,38 +165,37 @@ const Table = ({ tableId }: Props) => {
 
   const loadMoreData = useCallback(() => {
     if (!hasMore || isLoading || isFetching) return;
-
     if (data) {
       setTableRecords((prev) => [...prev, ...data]);
     }
 
-    setOffset((prevOffset) => prevOffset + 1000);
+    setOffset((prevOffset) => prevOffset + 10000);
     if (data?.length === 0) {
       setHasMore(false);
     }
   }, [data, hasMore, isLoading, isFetching]);
 
-  const parentRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    const element = parentRef.current;
+    if (!element) return; 
     const handleScroll = () => {
-      const scrollHeight = document.documentElement.scrollHeight;
-      const scrollTop = window.scrollY;
-      const clientHeight = window.innerHeight;
+      const scrollHeight = parentRef.current?.scrollHeight ?? 0;
+      const scrollTop = parentRef.current?.scrollTop ?? 0;
+      const clientHeight = parentRef.current?.clientHeight ?? 0;
 
-      if (scrollHeight - scrollTop - clientHeight < 500) {
+
+      if (scrollHeight - scrollTop - clientHeight < 2000) {
         loadMoreData();
       }
     };
 
-    // Attach the scroll event listener to window
-    window.addEventListener('scroll', handleScroll);
+    parentRef.current?.addEventListener("scroll", handleScroll);
 
-    // Cleanup the event listener when the component is unmounted
     return () => {
-      window.removeEventListener('scroll', handleScroll);
+      parentRef.current?.removeEventListener("scroll", handleScroll);
     };
-  }, [loadMoreData]);
+  }, [tableInstance.getRowModel().rows, loadMoreData]);
 
   useEffect(() => {
     if (tableInstance.getRowModel().rows.length > 0) {
@@ -206,7 +208,6 @@ const Table = ({ tableId }: Props) => {
       setTableFields(fields);
     }
     if (records) {
-      console.log(records);
       setTableRecords(records);
     }
   }, [fields, records]);

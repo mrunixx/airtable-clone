@@ -11,7 +11,7 @@ import BaseSidebar from "../_components/BaseSidebar";
 
 const BasePage = () => {
   const baseId = usePathname()?.slice(1);
-  
+
   const { data: base, isLoading: isBaseLoading } = api.base.getBase.useQuery(
     { id: baseId },
     { enabled: !!baseId },
@@ -28,7 +28,7 @@ const BasePage = () => {
 
   return (
     <>
-      <div className="min-h-screen w-full flex flex-col overflow-hidden">
+      <div className="min-h-screen h-screen w-full flex flex-col overflow-hidden">
         <BaseNavBar baseName={base?.name} />
         <BaseToolBar />
         <TableToolBar />
