@@ -38,7 +38,13 @@ export const tableRouter = createTRPCRouter({
       });
     }),
   getTableRecordValues: protectedProcedure
-    .input(z.object({ tableId: z.string().min(1) }))
+    .input(
+      z.object({
+        tableId: z.string().min(1),
+        offset: z.number().min(0),
+        limit: z.number().min(1),
+      }),
+    )
     .query(async ({ ctx, input }) => {
       const val = await ctx.db.recordValue.findMany({
         where: {
@@ -48,11 +54,12 @@ export const tableRouter = createTRPCRouter({
         },
         orderBy: {
           record: {
-            rowIndex: 'asc'
-          }
-        }
+            rowIndex: "asc",
+          },
+        },
+        skip: input.offset,
+        take: input.limit
       });
-
       return val;
     }),
   createTableField: protectedProcedure
@@ -218,38 +225,43 @@ export const tableRouter = createTRPCRouter({
   create15000Records: protectedProcedure
     .input(
       z.object({
-        tableId: z.string().min(1), 
-        fieldIds: z.array(z.string().min(1)), 
+        tableId: z.string().min(1),
+        fieldIds: z.array(z.string().min(1)),
       }),
     )
     .mutation(async ({ ctx, input }) => {
       const { tableId, fieldIds } = input;
 
-      const currentMax = await ctx.db.record.count({where: {tableId: tableId}}) 
+      const currentMax = await ctx.db.record.count({
+        where: { tableId: tableId },
+      });
       const records = Array.from({ length: 15000 }, (_, i) => ({
-        id: `${tableId}-record-${i}`, 
+        id: `${tableId}-record-${i + currentMax}`,
         rowIndex: i + currentMax,
         tableId: tableId,
       }));
 
       const recordValuesData = records.flatMap((record) =>
         fieldIds.map((fieldId) => ({
-          id: `${record.id}-${fieldId}`, 
-          data: "", 
+          id: `${record.id}-${fieldId}`,
+          data: "",
           recordId: record.id,
           fieldId: fieldId,
         })),
       );
 
-      const result = await ctx.db.$transaction(async (prisma) => {
-        await prisma.record.createMany({
-          data: records,
-        });
-  
-        return await prisma.recordValue.createMany({
-          data: recordValuesData,
-        });
-      }, {timeout: 60000})
+      const result = await ctx.db.$transaction(
+        async (prisma) => {
+          await prisma.record.createMany({
+            data: records,
+          });
+
+          return await prisma.recordValue.createMany({
+            data: recordValuesData,
+          });
+        },
+        { timeout: 60000 },
+      );
       return result;
     }),
 });

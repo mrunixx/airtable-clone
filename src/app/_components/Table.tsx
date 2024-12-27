@@ -4,12 +4,13 @@ import {
   ColumnDef,
   getCoreRowModel,
   flexRender,
+  getPaginationRowModel,
 } from "@tanstack/react-table";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import TableHeader from "./TableHeader";
 import { api } from "~/trpc/react";
 import Loading from "./Loading";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import NewFieldDialog from "./NewFieldDialog";
 import TableCell from "./TableCell";
 import TableRow from "./TableRow";
@@ -35,14 +36,24 @@ const Table = ({ tableId }: Props) => {
     isLoading: isRecordsLoading,
     refetch,
   } = api.table.getTableRecordValues.useQuery(
-    { tableId: tableId },
-    { refetchOnWindowFocus: false, placeholderData: keepPreviousData },
+    { tableId: tableId, offset: 0, limit: 1000}
   );
 
   const [tableFields, setTableFields] = useState(fields);
   const [tableReady, setTableReady] = useState(false);
   const [tableRecords, setTableRecords] = useState(records ?? []);
   const [clickable, setClickable] = useState(true);
+  const [hasMore, setHasMore] = useState(true);
+  const [offset, setOffset] = useState(1000);
+
+  const { data, isLoading, isFetching } = api.table.getTableRecordValues.useQuery(
+    {
+      tableId: tableId,
+      offset: offset,
+      limit: 1000,
+    },
+    { enabled: hasMore } // Only fetch data if there's more to load
+  );
 
   const transformedData = useMemo(() => {
     const grouped: Record<string, Record<string, string>> = {};
@@ -84,13 +95,17 @@ const Table = ({ tableId }: Props) => {
     if (tableRecords && clickable) {
       setClickable(false);
       void createTableRecordMutation
-        .mutateAsync({ tableId: tableId, rowIndex: tableRecords.length })
+        .mutateAsync({
+          tableId: tableId,
+          rowIndex: tableRecords.length / colDefs.length,
+        })
         .then((res) => {
           const newRecords = [...(tableRecords ?? []), ...res];
           setTableRecords(newRecords);
           setClickable(true);
         });
     }
+    console.log(tableId);
   };
 
   const handleAddRecordBatch = async () => {
@@ -99,7 +114,7 @@ const Table = ({ tableId }: Props) => {
 
     tableFields?.forEach((tf) => {
       for (let i = 0; i < 15000; i++) {
-        const recordId = `${tf.id}-record-${i}`;
+        const recordId = `${tableId}-record-${i}`;
         const recordValueObj = {
           id: `${recordId}-${tf.id}`,
           data: "",
@@ -142,9 +157,43 @@ const Table = ({ tableId }: Props) => {
     data: transformedData,
     columns: colDefs,
     getCoreRowModel: getCoreRowModel(),
+    rowCount: transformedData.length / colDefs.length,
   });
 
+  const loadMoreData = useCallback(() => {
+    if (!hasMore || isLoading || isFetching) return;
+
+    if (data) {
+      setTableRecords((prev) => [...prev, ...data]);
+    }
+
+    setOffset((prevOffset) => prevOffset + 1000);
+    if (data?.length === 0) {
+      setHasMore(false);
+    }
+  }, [data, hasMore, isLoading, isFetching]);
+
   const parentRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollHeight = document.documentElement.scrollHeight;
+      const scrollTop = window.scrollY;
+      const clientHeight = window.innerHeight;
+
+      if (scrollHeight - scrollTop - clientHeight < 500) {
+        loadMoreData();
+      }
+    };
+
+    // Attach the scroll event listener to window
+    window.addEventListener('scroll', handleScroll);
+
+    // Cleanup the event listener when the component is unmounted
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, [loadMoreData]);
 
   useEffect(() => {
     if (tableInstance.getRowModel().rows.length > 0) {
@@ -194,7 +243,7 @@ const Table = ({ tableId }: Props) => {
         {tableInstance.getRowModel().rows.map((row, index) => {
           return (
             <TableRow key={index}>
-              {row.getVisibleCells().map((cell, colIndex) => {
+              {row?.getVisibleCells().map((cell, colIndex) => {
                 return (
                   <div key={cell.id} className="m-0 flex p-0">
                     {colIndex === 0 && (
@@ -229,14 +278,14 @@ const Table = ({ tableId }: Props) => {
               {tableInstance.getRowModel().rows.length} records
             </div>
           </div>
-          <div className="h-[34px] flex flex-grow self-end border-t border-gray-300 bg-white"></div>
+          <div className="flex h-[34px] flex-grow self-end border-t border-gray-300 bg-white"></div>
         </div>
       </div>
-      <div className="flex flex-col justify-between w-full">
+      <div className="flex w-full flex-col justify-between">
         <div className="flex h-8 w-full border-b border-gray-300 bg-white">
           <NewFieldDialog handleClick={handleAddField} />
         </div>
-          <div className="h-[34px] border-t border-gray-300 bg-white"></div>
+        <div className="h-[34px] border-t border-gray-300 bg-white"></div>
       </div>
     </div>
   );
