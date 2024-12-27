@@ -3,6 +3,7 @@ import {
   ColumnDef,
   getCoreRowModel,
   flexRender,
+  getSortedRowModel,
 } from "@tanstack/react-table";
 import TableHeader from "./TableHeader";
 import { api } from "~/trpc/react";
@@ -46,6 +47,7 @@ const Table = ({ tableId }: Props) => {
   const [tableRecords, setTableRecords] = useState(records ?? []);
   const [clickable, setClickable] = useState(true);
   const [hasMore, setHasMore] = useState(true);
+  const [sortingState, setSortingState] = useState([]);
   const transformedData = useMemo(() => {
     const grouped: Record<string, Record<string, string>> = {};
 
@@ -132,6 +134,7 @@ const Table = ({ tableId }: Props) => {
     data: transformedData,
     columns: colDefs,
     getCoreRowModel: getCoreRowModel(),
+    getSortedRowModel: getSortedRowModel(),
   });
 
   const loadMoreData = () => {
@@ -205,7 +208,7 @@ const Table = ({ tableId }: Props) => {
               return headerGroup.headers.map((header, index) => {
                 {
                   return (
-                    <div key={index} className="m-0 p-0">
+                    <div key={index} className="m-0 p-0" onClick={() => header.column.toggleSorting()}>
                       {flexRender(
                         header.column.columnDef.header,
                         header.getContext(),
