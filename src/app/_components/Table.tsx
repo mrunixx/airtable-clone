@@ -13,6 +13,7 @@ import TableCell from "./TableCell";
 import TableRow from "./TableRow";
 import NewRecordButton from "./NewRecordButton";
 import { keepPreviousData } from "@tanstack/react-query";
+import { throttle } from "lodash";
 
 type Props = {
   tableId: string;
@@ -20,6 +21,7 @@ type Props = {
 
 const Table = ({ tableId }: Props) => {
   const parentRef = useRef<HTMLDivElement>(null);
+  const [offset, setOffset] = useState(0);
 
   const createTableRecordMutation = api.table.createTableRecord.useMutation();
   const createTableFieldMutation = api.table.createTableField.useMutation();
@@ -33,9 +35,10 @@ const Table = ({ tableId }: Props) => {
   const {
     data: records,
     isLoading: isRecordsLoading,
-    refetch,
+    isFetching: isRecordsFetching,
+    refetch: refetchRecords,
   } = api.table.getTableRecordValues.useQuery(
-    { tableId: tableId, offset: 0, limit: 10000 },
+    { tableId: tableId, offset: offset, limit: 10000 },
     { refetchOnWindowFocus: false, placeholderData: keepPreviousData },
   );
 
@@ -44,18 +47,6 @@ const Table = ({ tableId }: Props) => {
   const [tableRecords, setTableRecords] = useState(records ?? []);
   const [clickable, setClickable] = useState(true);
   const [hasMore, setHasMore] = useState(true);
-  const [offset, setOffset] = useState(10000);
-
-  const { data, isLoading, isFetching } =
-    api.table.getTableRecordValues.useQuery(
-      {
-        tableId: tableId,
-        offset: offset,
-        limit: 10000,
-      },
-      { enabled: hasMore },
-    );
-
   const transformedData = useMemo(() => {
     const grouped: Record<string, Record<string, string>> = {};
 
@@ -116,10 +107,9 @@ const Table = ({ tableId }: Props) => {
           tableId: tableId,
           fieldIds: tableFields.map((t) => t.id),
         });
-        await refetch().then((res) => {
+        setOffset(0);
+        await refetchRecords().then(() => {
           setTableReady(true);
-          setTableRecords(res.data ?? []);
-          setOffset((prev) => prev + 10000);
         });
       } catch (error) {
         console.error("Error creating batch records:", error);
@@ -133,7 +123,7 @@ const Table = ({ tableId }: Props) => {
       .then((res) => {
         const newFields = [...(tableFields ?? [])];
         newFields.push(res);
-        void refetch().then(() => {
+        void refetchRecords().then(() => {
           setTableFields(newFields);
         });
       });
@@ -145,18 +135,11 @@ const Table = ({ tableId }: Props) => {
     getCoreRowModel: getCoreRowModel(),
   });
 
-  const loadMoreData = useCallback(() => {
-    if (!hasMore || isLoading || isFetching) return;
-    if (data) {
-      setTableRecords((prev) => [...prev, ...data]);
-    }
-    setOffset((prevOffset) => {
-      return prevOffset + 10000;
-    });
-    if (data?.length === 0) {
-      setHasMore(false);
-    }
-  }, [data, hasMore, isLoading, isFetching]);
+  const loadMoreData = () => {
+    if (!hasMore || isRecordsLoading || isRecordsFetching) return;
+    const newOffset = offset + 10000;
+    setOffset(newOffset);
+  };
 
   useEffect(() => {
     console.log("Offset changed:", offset);
@@ -167,11 +150,10 @@ const Table = ({ tableId }: Props) => {
       const element = parentRef.current;
       if (element) {
         const handleScroll = () => {
-          const scrollHeight = element.scrollHeight ?? 0;
-          const scrollTop = element.scrollTop ?? 0;
-          const clientHeight = element.clientHeight ?? 0;
+          const { scrollHeight, scrollTop, clientHeight } = element;
 
-          if (scrollHeight - scrollTop - clientHeight < 2000) {
+          const threshold = clientHeight * 2;
+          if (scrollHeight - scrollTop - clientHeight < threshold) {
             loadMoreData();
           }
         };
@@ -187,7 +169,7 @@ const Table = ({ tableId }: Props) => {
     }, 500);
 
     return () => clearInterval(interval);
-  }, [tableRecords, loadMoreData]);
+  }, [loadMoreData]);
 
   useEffect(() => {
     if (tableInstance.getRowModel().rows.length > 0) {
@@ -200,7 +182,11 @@ const Table = ({ tableId }: Props) => {
       setTableFields(fields);
     }
     if (records) {
-      setTableRecords(records);
+      if (records.length === 0) {
+        setHasMore(false);
+      } else {
+        setTableRecords((prev) => [...prev, ...records]);
+      }
     }
   }, [fields, records]);
 
