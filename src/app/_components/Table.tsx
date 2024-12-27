@@ -1,12 +1,9 @@
-import { Base, Field, RecordValue } from "@prisma/client";
 import {
   useReactTable,
   ColumnDef,
   getCoreRowModel,
   flexRender,
-  getPaginationRowModel,
 } from "@tanstack/react-table";
-import { useVirtualizer } from "@tanstack/react-virtual";
 import TableHeader from "./TableHeader";
 import { api } from "~/trpc/react";
 import Loading from "./Loading";
@@ -95,10 +92,10 @@ const Table = ({ tableId }: Props) => {
     );
   }, [tableFields]);
 
-  const handleAddRecord = () => {
+  const handleAddRecord = async () => {
     if (tableRecords && clickable) {
       setClickable(false);
-      void createTableRecordMutation
+      await createTableRecordMutation
         .mutateAsync({
           tableId: tableId,
           rowIndex: tableRecords.length / colDefs.length,
@@ -112,31 +109,17 @@ const Table = ({ tableId }: Props) => {
   };
 
   const handleAddRecordBatch = async () => {
-    setTableReady(false);
-    const recordValuesToAdd: RecordValue[] = [];
-
-    tableFields?.forEach((tf) => {
-      for (let i = (tableRecords.length / colDefs.length); i < 250; i++) {
-        const recordId = `${tableId}-record-${i}`;
-        const recordValueObj = {
-          id: `${recordId}-${tf.id}`,
-          data: "",
-          recordId: recordId,
-          fieldId: tf.id,
-        };
-        recordValuesToAdd.push(recordValueObj);
-      }
-    });
-
-    const newRecords = [...tableRecords, ...recordValuesToAdd];
-    setTableRecords(newRecords);
-    setTableReady(true);
-
     if (tableFields) {
       try {
+        setTableReady(false);
         await createBatchTableRecordMutation.mutateAsync({
           tableId: tableId,
           fieldIds: tableFields.map((t) => t.id),
+        });
+        await refetch().then((res) => {
+          setTableReady(true);
+          setTableRecords(res.data ?? []);
+          setOffset((prev) => prev + 10000);
         });
       } catch (error) {
         console.error("Error creating batch records:", error);
@@ -160,7 +143,6 @@ const Table = ({ tableId }: Props) => {
     data: transformedData,
     columns: colDefs,
     getCoreRowModel: getCoreRowModel(),
-    rowCount: transformedData.length / colDefs.length,
   });
 
   const loadMoreData = useCallback(() => {
@@ -168,34 +150,44 @@ const Table = ({ tableId }: Props) => {
     if (data) {
       setTableRecords((prev) => [...prev, ...data]);
     }
-
-    setOffset((prevOffset) => prevOffset + 10000);
+    setOffset((prevOffset) => {
+      return prevOffset + 10000;
+    });
     if (data?.length === 0) {
       setHasMore(false);
     }
   }, [data, hasMore, isLoading, isFetching]);
 
+  useEffect(() => {
+    console.log("Offset changed:", offset);
+  }, [offset]);
 
   useEffect(() => {
-    const element = parentRef.current;
-    if (!element) return; 
-    const handleScroll = () => {
-      const scrollHeight = parentRef.current?.scrollHeight ?? 0;
-      const scrollTop = parentRef.current?.scrollTop ?? 0;
-      const clientHeight = parentRef.current?.clientHeight ?? 0;
+    const interval = setInterval(() => {
+      const element = parentRef.current;
+      if (element) {
+        const handleScroll = () => {
+          const scrollHeight = element.scrollHeight ?? 0;
+          const scrollTop = element.scrollTop ?? 0;
+          const clientHeight = element.clientHeight ?? 0;
 
+          if (scrollHeight - scrollTop - clientHeight < 2000) {
+            loadMoreData();
+          }
+        };
 
-      if (scrollHeight - scrollTop - clientHeight < 2000) {
-        loadMoreData();
+        element.addEventListener("scroll", handleScroll);
+
+        clearInterval(interval);
+
+        return () => {
+          element.removeEventListener("scroll", handleScroll);
+        };
       }
-    };
+    }, 500);
 
-    parentRef.current?.addEventListener("scroll", handleScroll);
-
-    return () => {
-      parentRef.current?.removeEventListener("scroll", handleScroll);
-    };
-  }, [tableInstance.getRowModel().rows, loadMoreData]);
+    return () => clearInterval(interval);
+  }, [tableRecords, loadMoreData]);
 
   useEffect(() => {
     if (tableInstance.getRowModel().rows.length > 0) {
