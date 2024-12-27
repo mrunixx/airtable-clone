@@ -13,7 +13,6 @@ import TableCell from "./TableCell";
 import TableRow from "./TableRow";
 import NewRecordButton from "./NewRecordButton";
 import { keepPreviousData } from "@tanstack/react-query";
-import { throttle } from "lodash";
 
 type Props = {
   tableId: string;
