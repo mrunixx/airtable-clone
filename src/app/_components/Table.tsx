@@ -118,15 +118,13 @@ const Table = ({ tableId }: Props) => {
     }
   };
 
-  const handleAddField = (input: string) => {
-    void createTableFieldMutation
+  const handleAddField = async (input: string) => {
+    await createTableFieldMutation
       .mutateAsync({ name: input, tableId: tableId })
       .then((res) => {
         const newFields = [...(tableFields ?? [])];
         newFields.push(res);
-        void refetchRecords().then(() => {
-          setTableFields(newFields);
-        });
+        setTableFields(newFields);
       });
   };
 
