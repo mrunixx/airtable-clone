@@ -1,4 +1,3 @@
-import { Table } from "@tanstack/react-table";
 import { Dispatch, SetStateAction, useState } from "react";
 import { api } from "~/trpc/react";
 
@@ -32,7 +31,7 @@ const TableCell = ({
 
   const cellMutation = api.table.updateCellValue.useMutation();
 
-  const handleDbSave = () => {
+  const handleDbSave = async () => {
     if (input !== initialInput) {
       setTableRecords((prev) =>
         prev.map((rV) =>
@@ -44,13 +43,25 @@ const TableCell = ({
 
       setInitialInput(input);
       if (recordId) {
-        void cellMutation.mutateAsync({
-          data: input,
-          fieldId: fieldId,
-          recordId: recordId,
-        });
+        const saveToDb = async (attempt = 1) => {
+          try {
+            await cellMutation.mutateAsync({
+              data: input,
+              fieldId: fieldId,
+              recordId: recordId,
+            });
+            console.log("Input saved at: ", fieldId, recordId);
+          } catch {
+            if (attempt < 3) {
+              setTimeout(() => saveToDb(attempt + 1), 3000); 
+            } else {
+              console.error("Failed to save input after 3 attempts.");
+            }
+          }
+        };
+  
+        await saveToDb();
       }
-      console.log("input saved at: ", fieldId, recordId);
     }
     setIsEditable(false);
   };
