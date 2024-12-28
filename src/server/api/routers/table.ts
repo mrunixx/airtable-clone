@@ -79,22 +79,17 @@ export const tableRouter = createTRPCRouter({
         },
       });
 
-      const recordValues = [];
-      for (const r of records) {
-        recordValues.push(
-          async () =>
-            await ctx.db.recordValue.create({
-              data: {
-                fieldId: field.id,
-                recordId: r.id,
-                data: "",
-              },
-            }),
-        );
+      if (records.length > 0) {
+        await ctx.db.recordValue.createMany({
+          data: records.map((r) => ({
+            fieldId: field.id,
+            recordId: r.id,
+            data: "",
+          })),
+        });
       }
 
-      await Promise.all(recordValues);
-      return field;
+      return { success: true };
     }),
   createTableRecord: protectedProcedure
     .input(z.object({ tableId: z.string().min(1), rowIndex: z.number().int() }))
@@ -208,6 +203,10 @@ export const tableRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
+      console.log({
+        record: input.recordId,
+        field: input.fieldId
+      })
       const updatedRecordValue = await ctx.db.recordValue.update({
         where: {
           recordId_fieldId: {
@@ -216,7 +215,7 @@ export const tableRouter = createTRPCRouter({
           },
         },
         data: {
-          data: input.data, // Update the `data` field with the provided value
+          data: input.data, 
         },
       });
 

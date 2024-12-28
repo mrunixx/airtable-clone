@@ -129,7 +129,7 @@ const Table = ({ tableId }: Props) => {
     const newFields = [...tableFields ?? [], newField]
     setTableFields(newFields);
     await createTableFieldMutation
-      .mutateAsync({id: newId, name: input, tableId: tableId })
+      .mutateAsync(newField)
   };
 
   const tableInstance = useReactTable<Record<string, string>>({
