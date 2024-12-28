@@ -1,3 +1,5 @@
+import SortDialog from "./SortDialog";
+
 const TableToolBar = () => {
   return (
     <div className="toolbar flex h-11 w-full items-center pl-3 pr-4 shadow-elevation-low">
@@ -116,25 +118,9 @@ const TableToolBar = () => {
           Group
         </p>
       </div>
-      <div
-        className="grid-view-options mr-2 flex h-[26px] items-center justify-center rounded-sm px-2 py-1 hover:bg-[#f1f1f2]"
-        role="button"
-      >
-        <svg
-          width="16"
-          height="16"
-          viewBox="0 0 16 16"
-          className="icon flex-none"
-        >
-          <use
-            fill="currentColor"
-            href="/icons/icon_definitions.svg?v=68b23d569e0a0c2f5529fd9b824929e7#ArrowsDownUp"
-          ></use>
-        </svg>
-        <p className="ml-1 p-0 text-[14px] leading-[18px] text-[#212123] font-light">
-          Sort
-        </p>
-      </div>
+      <SortDialog handleClick={function (input: string): void {
+        throw new Error("Function not implemented.");
+      } } /> 
       <div
         className="grid-view-options mr-2 flex h-[26px] items-center justify-center rounded-sm px-2 py-1 hover:bg-[#f1f1f2]"
         role="button"
