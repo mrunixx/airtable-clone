@@ -60,7 +60,7 @@ const TableToolBar = () => {
         </svg>
       </div>
       <div
-        className="grid-view-options mr-2 flex h-[26px] items-center justify-center rounded-sm px-2 py-1 hover:bg-[#f1f1f2]"
+        className="grid-view-options mr-2 pl-4 flex h-[26px] items-center justify-center rounded-sm px-2 py-1 hover:bg-[#f1f1f2]"
         role="button"
       >
         <svg

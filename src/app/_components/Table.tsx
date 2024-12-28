@@ -8,7 +8,7 @@ import {
 import TableHeader from "./TableHeader";
 import { api } from "~/trpc/react";
 import Loading from "./Loading";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import NewFieldDialog from "./NewFieldDialog";
 import TableCell from "./TableCell";
 import TableRow from "./TableRow";
