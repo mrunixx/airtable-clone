@@ -4,6 +4,7 @@ import {
   getCoreRowModel,
   flexRender,
   getSortedRowModel,
+  Header,
 } from "@tanstack/react-table";
 import TableHeader from "./TableHeader";
 import { api } from "~/trpc/react";
@@ -74,6 +75,7 @@ const Table = ({ tableId }: Props) => {
         cell: ({ row }) => {
           return (
             <TableCell
+              setTableRecords={setTableRecords}
               fieldId={field.id}
               data={row.original[field.id]}
               recordId={row.original.recordId}
@@ -123,12 +125,11 @@ const Table = ({ tableId }: Props) => {
     const newField: Field = {
       id: `field-${crypto.randomUUID()}`,
       name: input,
-      tableId: tableId
-    }
-    const newFields = [...tableFields ?? [], newField]
+      tableId: tableId,
+    };
+    const newFields = [...(tableFields ?? []), newField];
     setTableFields(newFields);
-    await createTableFieldMutation
-      .mutateAsync(newField)
+    await createTableFieldMutation.mutateAsync(newField);
   };
 
   const tableInstance = useReactTable<Record<string, string>>({
@@ -136,12 +137,29 @@ const Table = ({ tableId }: Props) => {
     columns: colDefs,
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
+    meta: {
+      updateData: (recordId: string, colId: string, data: string) =>
+        setTableRecords((prev) =>
+          prev.map((rV) =>
+            rV.fieldId === colId && rV.recordId === recordId
+              ? { ...rV, data: data }
+              : rV,
+          ),
+        ),
+    },
   });
 
   const loadMoreData = () => {
     if (!hasMore || isRecordsLoading || isRecordsFetching) return;
     const newOffset = offset + 10000;
     setOffset(newOffset);
+  };
+
+  const handleFrontendSort = (
+    header: Header<Record<string, string>, unknown>,
+  ) => {
+    // TODO: make sure table sorts properly
+    header.column.toggleSorting();
   };
 
   useEffect(() => {
@@ -209,7 +227,11 @@ const Table = ({ tableId }: Props) => {
               return headerGroup.headers.map((header, index) => {
                 {
                   return (
-                    <div key={index} className="m-0 p-0" onClick={() => header.column.toggleSorting()}>
+                    <div
+                      key={index}
+                      className="m-0 p-0"
+                      onClick={() => handleFrontendSort(header)}
+                    >
                       {flexRender(
                         header.column.columnDef.header,
                         header.getContext(),

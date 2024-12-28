@@ -1,14 +1,31 @@
-import { useState } from "react";
+import { Table } from "@tanstack/react-table";
+import { Dispatch, SetStateAction, useState } from "react";
 import { api } from "~/trpc/react";
 
 type Props = {
+  setTableRecords: Dispatch<
+    SetStateAction<
+      {
+        fieldId: string;
+        recordId: string;
+        data: string;
+        id: string;
+      }[]
+    >
+  >;
   fieldId: string;
   recordId?: string | undefined;
   data?: string | undefined;
   rowIndex?: string | undefined;
 };
 
-const TableCell = ({ fieldId, recordId, data, rowIndex }: Props) => {
+const TableCell = ({
+  setTableRecords,
+  fieldId,
+  recordId,
+  data,
+  rowIndex,
+}: Props) => {
   const [input, setInput] = useState(data ?? "");
   const [initialInput, setInitialInput] = useState(data ?? "");
   const [isEditable, setIsEditable] = useState(false);
@@ -17,9 +34,21 @@ const TableCell = ({ fieldId, recordId, data, rowIndex }: Props) => {
 
   const handleDbSave = () => {
     if (input !== initialInput) {
+      setTableRecords((prev) =>
+        prev.map((rV) =>
+          rV.fieldId === fieldId && rV.recordId === recordId
+            ? { ...rV, data: input }
+            : rV,
+        ),
+      );
+
       setInitialInput(input);
       if (recordId) {
-        void cellMutation.mutateAsync({ data: input, fieldId: fieldId, recordId: recordId })
+        void cellMutation.mutateAsync({
+          data: input,
+          fieldId: fieldId,
+          recordId: recordId,
+        });
       }
       console.log("input saved at: ", fieldId, recordId);
     }
@@ -34,7 +63,7 @@ const TableCell = ({ fieldId, recordId, data, rowIndex }: Props) => {
     if (e.key !== "Tab") {
       setIsEditable(true);
     }
-  }
+  };
 
   return (
     <div
@@ -47,7 +76,7 @@ const TableCell = ({ fieldId, recordId, data, rowIndex }: Props) => {
         value={input}
         onChange={(e) => setInput(e.target.value)}
         onBlur={handleDbSave}
-        className="h-[31px] w-full cursor-default bg-transparent focus:bg-white p-1.5"
+        className="h-[31px] w-full cursor-default bg-transparent p-1.5 focus:bg-white"
         readOnly={!isEditable}
       />
     </div>
