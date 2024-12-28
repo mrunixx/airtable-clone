@@ -53,7 +53,7 @@ const TableCell = ({
             console.log("Input saved at: ", fieldId, recordId);
           } catch {
             if (attempt < 3) {
-              setTimeout(() => saveToDb(attempt + 1), 3000); 
+              setTimeout(() => void saveToDb(attempt + 1), 3000); 
             } else {
               console.error("Failed to save input after 3 attempts.");
             }
