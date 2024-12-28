@@ -14,6 +14,7 @@ import TableCell from "./TableCell";
 import TableRow from "./TableRow";
 import NewRecordButton from "./NewRecordButton";
 import { keepPreviousData } from "@tanstack/react-query";
+import { Field } from "@prisma/client";
 
 type Props = {
   tableId: string;
@@ -119,13 +120,16 @@ const Table = ({ tableId }: Props) => {
   };
 
   const handleAddField = async (input: string) => {
+    const newId = `field-${crypto.randomUUID()}`
+    const newField: Field = {
+      id: newId,
+      name: input,
+      tableId: tableId
+    }
+    const newFields = [...tableFields ?? [], newField]
+    setTableFields(newFields);
     await createTableFieldMutation
-      .mutateAsync({ name: input, tableId: tableId })
-      .then((res) => {
-        const newFields = [...(tableFields ?? [])];
-        newFields.push(res);
-        setTableFields(newFields);
-      });
+      .mutateAsync({id: newId, name: input, tableId: tableId })
   };
 
   const tableInstance = useReactTable<Record<string, string>>({

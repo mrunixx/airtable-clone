@@ -63,11 +63,11 @@ export const tableRouter = createTRPCRouter({
       return val;
     }),
   createTableField: protectedProcedure
-    .input(z.object({ tableId: z.string().min(1), name: z.string().min(1) }))
+    .input(z.object({id: z.string().min(1), tableId: z.string().min(1), name: z.string().min(1) }))
     .mutation(async ({ ctx, input }) => {
-      // for each record, create a new record value linking to field
       const field = await ctx.db.field.create({
         data: {
+          id: input.id,
           name: input.name,
           tableId: input.tableId,
         },
