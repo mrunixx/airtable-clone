@@ -120,9 +120,8 @@ const Table = ({ tableId }: Props) => {
   };
 
   const handleAddField = async (input: string) => {
-    const newId = `field-${crypto.randomUUID()}`
     const newField: Field = {
-      id: newId,
+      id: `field-${crypto.randomUUID()}`,
       name: input,
       tableId: tableId
     }
