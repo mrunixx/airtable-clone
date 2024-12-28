@@ -93,7 +93,7 @@ const Table = ({ tableId }: Props) => {
       await createTableRecordMutation
         .mutateAsync({
           tableId: tableId,
-          rowIndex: tableRecords.length / colDefs.length,
+          rowIndex: tableRecords.length / tableInstance.getAllColumns().length,
         })
         .then((res) => {
           const newRecords = [...(tableRecords ?? []), ...res];
