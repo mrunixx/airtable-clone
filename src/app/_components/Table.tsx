@@ -40,7 +40,7 @@ const Table = ({ tableId }: Props) => {
     isFetching: isRecordsFetching,
     refetch: refetchRecords,
   } = api.table.getTableRecordValues.useQuery(
-    { tableId: tableId, offset: offset, limit: 10000 },
+    { tableId: tableId, offset: offset, limit: 1000},
     { refetchOnWindowFocus: false, placeholderData: keepPreviousData },
   );
 
@@ -151,7 +151,7 @@ const Table = ({ tableId }: Props) => {
 
   const loadMoreData = () => {
     if (!hasMore || isRecordsLoading || isRecordsFetching) return;
-    const newOffset = offset + 10000;
+    const newOffset = offset + 1000;
     setOffset(newOffset);
   };
 
