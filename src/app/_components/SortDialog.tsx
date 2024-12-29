@@ -14,7 +14,7 @@ type Props = {
 export default function SortDialog({ tableInstanceRef, tableId }: Props) {
   const [isOpen, setIsOpen] = useState(false);
   const [index, setIndex] = useState(0);
-  const [sort, setSort] = useState("")
+  const [sort, setSort] = useState("A → Z")
 
   const handleOnClick = () => {
     setIsOpen(false);
