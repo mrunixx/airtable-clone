@@ -248,7 +248,7 @@ const TanstackTable = ({ tableId, tableInstanceRef }: Props) => {
     setTableRecords([]);
     setOffset(0);
     setHasMore(true);
-    refetchRecords();
+    void refetchRecords();
   }, [tableId]);
 
   if (isBaseLoading || !tableReady) {
