@@ -5,23 +5,25 @@ import {
   flexRender,
   getSortedRowModel,
   Header,
+  Table,
 } from "@tanstack/react-table";
 import TableHeader from "./TableHeader";
 import { api } from "~/trpc/react";
 import Loading from "./Loading";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { MutableRefObject, Ref, RefObject, useEffect, useMemo, useRef, useState } from "react";
 import NewFieldDialog from "./NewFieldDialog";
 import TableCell from "./TableCell";
 import TableRow from "./TableRow";
 import NewRecordButton from "./NewRecordButton";
-import { keepPreviousData } from "@tanstack/react-query";
-import { Field } from "@prisma/client";
+import { Field, RecordValue } from "@prisma/client";
+import { TableColumn } from "@nextui-org/react";
 
 type Props = {
   tableId: string;
+  tableInstanceRef: MutableRefObject<Table<Record<string, string>>> | MutableRefObject<null>
 };
 
-const Table = ({ tableId }: Props) => {
+const TanstackTable = ({ tableId, tableInstanceRef }: Props) => {
   const parentRef = useRef<HTMLDivElement>(null);
   const [offset, setOffset] = useState(0);
 
@@ -32,7 +34,7 @@ const Table = ({ tableId }: Props) => {
   const { data: fields, isLoading: isBaseLoading } =
     api.table.getTableHeaders.useQuery(
       { tableId: tableId },
-      { refetchOnWindowFocus: false, placeholderData: keepPreviousData },
+      { refetchOnWindowFocus: false},
     );
   const {
     data: records,
@@ -41,7 +43,7 @@ const Table = ({ tableId }: Props) => {
     refetch: refetchRecords,
   } = api.table.getTableRecordValues.useQuery(
     { tableId: tableId, offset: offset, limit: 1000},
-    { refetchOnWindowFocus: false, placeholderData: keepPreviousData },
+    { refetchOnWindowFocus: false},
   );
 
   const [tableFields, setTableFields] = useState(fields);
@@ -93,7 +95,7 @@ const Table = ({ tableId }: Props) => {
       await createTableRecordMutation
         .mutateAsync({
           tableId: tableId,
-          rowIndex: tableRecords.length / tableInstance.getAllColumns().length,
+          rowIndex: tableRecords.length / (tableFields?.length ?? 1),
         })
         .then((res) => {
           const newRecords = [...(tableRecords ?? []), ...res];
@@ -122,13 +124,28 @@ const Table = ({ tableId }: Props) => {
   };
 
   const handleAddField = async (input: string) => {
+    const newRvs: RecordValue[] = [];
+
     const newField: Field = {
       id: `field-${crypto.randomUUID()}`,
       name: input,
       tableId: tableId,
     };
+
+    for (const record of tableInstance.getRowModel().rows) {
+      const recordId = record.original.recordId ?? "";
+      const newRv: RecordValue = {
+        id: `${recordId}-${newField.id}`,
+        data: "",
+        fieldId: newField.id,
+        recordId: recordId
+      }
+      newRvs.push(newRv);
+    }
     const newFields = [...(tableFields ?? []), newField];
+    const newRecords = [...(tableRecords ?? []), ...newRvs];
     setTableFields(newFields);
+    setTableRecords(newRecords);
     await createTableFieldMutation.mutateAsync(newField);
   };
 
@@ -148,6 +165,8 @@ const Table = ({ tableId }: Props) => {
         ),
     },
   });
+
+  tableInstanceRef.current = tableInstance;
 
   const loadMoreData = () => {
     if (!hasMore || isRecordsLoading || isRecordsFetching) return;
@@ -172,6 +191,7 @@ const Table = ({ tableId }: Props) => {
       if (element) {
         const handleScroll = () => {
           const { scrollHeight, scrollTop, clientHeight } = element;
+          if (scrollHeight <= clientHeight) return;
 
           const threshold = clientHeight * 2;
           if (scrollHeight - scrollTop - clientHeight < threshold) {
@@ -295,4 +315,4 @@ const Table = ({ tableId }: Props) => {
   );
 };
 
-export default Table;
+export default TanstackTable;

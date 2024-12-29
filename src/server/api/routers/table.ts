@@ -82,6 +82,7 @@ export const tableRouter = createTRPCRouter({
       if (records.length > 0) {
         await ctx.db.recordValue.createMany({
           data: records.map((r) => ({
+            id: `${r.id}-${field.id}`,
             fieldId: field.id,
             recordId: r.id,
             data: "",
