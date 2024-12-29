@@ -1,6 +1,13 @@
+import { MutableRefObject } from "react";
 import SortDialog from "./SortDialog";
+import { Table } from "@tanstack/react-table";
 
-const TableToolBar = () => {
+type Props = {
+  tableInstanceRef: MutableRefObject<Table<Record<string, string>>> | MutableRefObject<null>;
+  tableId: string
+}
+
+const TableToolBar = ({ tableInstanceRef, tableId } : Props) => {
   return (
     <div className="toolbar flex h-11 w-full items-center pl-3 pr-4 shadow-elevation-low">
       <div
@@ -118,9 +125,7 @@ const TableToolBar = () => {
           Group
         </p>
       </div>
-      <SortDialog handleClick={function (input: string): void {
-        throw new Error("Function not implemented.");
-      } } /> 
+      <SortDialog tableInstanceRef={tableInstanceRef} tableId={tableId}/> 
       <div
         className="grid-view-options mr-2 flex h-[26px] items-center justify-center rounded-sm px-2 py-1 hover:bg-[#f1f1f2]"
         role="button"

@@ -1,19 +1,28 @@
 import { Popover, PopoverTrigger, PopoverContent } from "@nextui-org/react";
-import { useState } from "react";
+import { MutableRefObject, useState } from "react";
 import SortFieldDropdown from "./SortFieldDropdown";
+import { Table } from "@tanstack/react-table";
+import SortTypeDropdown from "./SortTypeDropdown";
 
 type Props = {
-  handleClick: (input: string) => void;
+  tableInstanceRef:
+    | MutableRefObject<Table<Record<string, string>>>
+    | MutableRefObject<null>;
+  tableId: string;
 };
 
-export default function SortDialog({ handleClick }: Props) {
-  const [input, setInput] = useState("");
+export default function SortDialog({ tableInstanceRef, tableId }: Props) {
   const [isOpen, setIsOpen] = useState(false);
+  const [index, setIndex] = useState(0);
+  const [sort, setSort] = useState("")
 
   const handleOnClick = () => {
-    handleClick(input);
-    setInput("");
     setIsOpen(false);
+    if (sort === "A → Z") {
+      tableInstanceRef.current?.getAllColumns()[index]?.toggleSorting(false, false);
+    } else {
+      tableInstanceRef.current?.getAllColumns()[index]?.toggleSorting(true, false);
+    }
   };
 
   const handleOpenChange = (change: boolean) => {
@@ -65,8 +74,29 @@ export default function SortDialog({ handleClick }: Props) {
             </svg>
           </div>
           <hr className="m-2" />
-          <div className="mb-2 pt-2">
-            <SortFieldDropdown />
+          <div className="flex items-center gap-3 mb-3">
+            <SortFieldDropdown
+              selected={index}
+              setSelected={setIndex}
+              tableId={tableId}
+            />
+            <SortTypeDropdown
+              sort={sort}
+              setSort={setSort}
+            />
+            <div className="cursorp-pointer flex h-7 w-7 items-center justify-center rounded-sm hover:bg-gray-200" >
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 16 16"
+                className="icon flex-none"
+              >
+                <use
+                  fill="currentColor"
+                  href="/icons/icon_definitions.svg?v=68b23d569e0a0c2f5529fd9b824929e7#X"
+                ></use>
+              </svg>
+            </div>
           </div>
           <div className="flex">
             <div
@@ -96,12 +126,17 @@ export default function SortDialog({ handleClick }: Props) {
         </div>
         <div className="mt-auto flex h-11 w-full items-center bg-[#f6f8fc] px-1">
           <div className="ml-auto flex items-center">
-            <div tabIndex={0} role="button" className="mr-1 p-1 hover:text-black">
+            <div
+              tabIndex={0}
+              role="button"
+              className="mr-1 p-1 hover:text-black"
+            >
               Cancel
             </div>
             <button
               className="m-2 ml-auto h-7 rounded-md bg-[#0d70df] px-2 text-[13px] text-white shadow-elevation-low"
               type="button"
+              onClick={handleOnClick}
             >
               Sort
             </button>

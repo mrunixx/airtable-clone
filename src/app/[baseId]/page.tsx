@@ -8,8 +8,10 @@ import Table from "../_components/Table";
 import TableToolBar from "../_components/TableToolBar";
 import Loading from "../_components/Loading";
 import BaseSidebar from "../_components/BaseSidebar";
+import { useRef } from "react";
 
 const BasePage = () => {
+  const tableInstanceRef = useRef(null)
   const baseId = usePathname()?.slice(1);
 
   const { data: base, isLoading: isBaseLoading } = api.base.getBase.useQuery(
@@ -31,10 +33,10 @@ const BasePage = () => {
       <div className="min-h-screen h-screen w-full flex flex-col overflow-hidden">
         <BaseNavBar baseName={base?.name} />
         <BaseToolBar />
-        <TableToolBar />
+        <TableToolBar tableInstanceRef={tableInstanceRef} tableId={currentTableId ?? ""}/>
         <div className="flex flex-grow overflow-hidden bg-[#f8f8f8] h-full">
           <BaseSidebar />
-          <Table tableId={currentTableId ?? ""}/>
+          <Table tableId={currentTableId ?? ""} tableInstanceRef={tableInstanceRef}/>
         </div>
       </div>
     </>
