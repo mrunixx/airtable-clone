@@ -244,15 +244,11 @@ const TanstackTable = ({ tableId, tableInstanceRef }: Props) => {
   }, [tableRecords]);
 
   useEffect(() => {
-    const fetchTableRecords = async () => {
-      setTableReady(false);
-      setTableRecords([]);
-      setOffset(0);
-      setHasMore(true);
-      await refetchRecords(); 
-    };
-
-    fetchTableRecords();
+    setTableReady(false);
+    setTableRecords([]);
+    setOffset(0);
+    setHasMore(true);
+    refetchRecords();
   }, [tableId]);
 
   if (isBaseLoading || !tableReady) {
