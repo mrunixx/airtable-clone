@@ -19,7 +19,7 @@ export const baseRouter = createTRPCRouter({
         },
       });
       const caller = createCaller(ctx);
-      await caller.table.createDefaultTable({baseId: base.id, name: "table 1"});
+      await caller.table.createDefaultTable({baseId: base.id, name: "Table 1"});
       return base;
     }),
 

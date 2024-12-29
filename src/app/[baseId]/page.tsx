@@ -8,12 +8,11 @@ import Table from "../_components/Table";
 import TableToolBar from "../_components/TableToolBar";
 import Loading from "../_components/Loading";
 import BaseSidebar from "../_components/BaseSidebar";
-import { useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 const BasePage = () => {
-  const tableInstanceRef = useRef(null)
+  const tableInstanceRef = useRef(null);
   const baseId = usePathname()?.slice(1);
-
   const { data: base, isLoading: isBaseLoading } = api.base.getBase.useQuery(
     { id: baseId },
     { enabled: !!baseId },
@@ -22,7 +21,20 @@ const BasePage = () => {
   const { data: tables, isLoading: isTablesLoading } =
     api.table.getTables.useQuery({ baseId: baseId }, { enabled: !!baseId });
 
-  const currentTableId = tables?.[0]?.id;
+  const [currentTable, setCurrentTable] = useState(tables?.[0]?.id);
+  const [localTables, setLocalTables] = useState(tables);
+  useEffect(() => {
+    if (!currentTable) {
+      setCurrentTable(tables?.[0]?.id);
+    }
+    setLocalTables(tables)
+  }, [tables]);
+
+  useEffect(() => {
+    if (tableInstanceRef.current) {
+      tableInstanceRef.current = null; // Reset table instance on table change
+    }
+  }, [currentTable]);
 
   if (isBaseLoading || isTablesLoading || !base) {
     return <Loading />;
@@ -30,13 +42,26 @@ const BasePage = () => {
 
   return (
     <>
-      <div className="min-h-screen h-screen w-full flex flex-col overflow-hidden">
+      <div className="flex h-screen min-h-screen w-full flex-col overflow-hidden">
         <BaseNavBar baseName={base?.name} />
-        <BaseToolBar />
-        <TableToolBar tableInstanceRef={tableInstanceRef} tableId={currentTableId ?? ""}/>
-        <div className="flex flex-grow overflow-hidden bg-[#f8f8f8] h-full">
+        <BaseToolBar
+          tables={localTables ?? []}
+          setLocalTables={setLocalTables}
+          currentTable={currentTable ?? ""}
+          setCurrentTable={setCurrentTable}
+          baseId={baseId}
+        />
+        <TableToolBar
+          tableInstanceRef={tableInstanceRef}
+          tableId={currentTable ?? ""}
+        />
+        <div className="flex h-full flex-grow overflow-hidden bg-[#f8f8f8]">
           <BaseSidebar />
-          <Table tableId={currentTableId ?? ""} tableInstanceRef={tableInstanceRef}/>
+          <Table
+            key={currentTable}
+            tableId={currentTable ?? ""}
+            tableInstanceRef={tableInstanceRef}
+          />
         </div>
       </div>
     </>

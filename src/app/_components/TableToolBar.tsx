@@ -9,7 +9,7 @@ type Props = {
 
 const TableToolBar = ({ tableInstanceRef, tableId } : Props) => {
   return (
-    <div className="toolbar flex h-11 w-full items-center pl-3 pr-4 shadow-elevation-low">
+    <div className="toolbar flex h-11 w-full items-center pl-3 pr-4">
       <div
         className="views-sidebar mr-2 flex h-[26px] items-center justify-center rounded-sm px-1.5 hover:bg-[#f1f1f2]"
         role="button"

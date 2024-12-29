@@ -10,17 +10,26 @@ import {
 import TableHeader from "./TableHeader";
 import { api } from "~/trpc/react";
 import Loading from "./Loading";
-import { MutableRefObject, Ref, RefObject, useEffect, useMemo, useRef, useState } from "react";
+import {
+  MutableRefObject,
+  Ref,
+  RefObject,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import NewFieldDialog from "./NewFieldDialog";
 import TableCell from "./TableCell";
 import TableRow from "./TableRow";
 import NewRecordButton from "./NewRecordButton";
 import { Field, RecordValue } from "@prisma/client";
-import { TableColumn } from "@nextui-org/react";
 
 type Props = {
   tableId: string;
-  tableInstanceRef: MutableRefObject<Table<Record<string, string>>> | MutableRefObject<null>
+  tableInstanceRef:
+    | MutableRefObject<Table<Record<string, string>>>
+    | MutableRefObject<null>;
 };
 
 const TanstackTable = ({ tableId, tableInstanceRef }: Props) => {
@@ -34,7 +43,7 @@ const TanstackTable = ({ tableId, tableInstanceRef }: Props) => {
   const { data: fields, isLoading: isBaseLoading } =
     api.table.getTableHeaders.useQuery(
       { tableId: tableId },
-      { refetchOnWindowFocus: false},
+      { refetchOnWindowFocus: false },
     );
   const {
     data: records,
@@ -42,8 +51,8 @@ const TanstackTable = ({ tableId, tableInstanceRef }: Props) => {
     isFetching: isRecordsFetching,
     refetch: refetchRecords,
   } = api.table.getTableRecordValues.useQuery(
-    { tableId: tableId, offset: offset, limit: 1000},
-    { refetchOnWindowFocus: false},
+    { tableId: tableId, offset: offset, limit: 1000 },
+    { refetchOnWindowFocus: false },
   );
 
   const [tableFields, setTableFields] = useState(fields);
@@ -138,8 +147,8 @@ const TanstackTable = ({ tableId, tableInstanceRef }: Props) => {
         id: `${recordId}-${newField.id}`,
         data: "",
         fieldId: newField.id,
-        recordId: recordId
-      }
+        recordId: recordId,
+      };
       newRvs.push(newRv);
     }
     const newFields = [...(tableFields ?? []), newField];
@@ -154,16 +163,6 @@ const TanstackTable = ({ tableId, tableInstanceRef }: Props) => {
     columns: colDefs,
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
-    meta: {
-      updateData: (recordId: string, colId: string, data: string) =>
-        setTableRecords((prev) =>
-          prev.map((rV) =>
-            rV.fieldId === colId && rV.recordId === recordId
-              ? { ...rV, data: data }
-              : rV,
-          ),
-        ),
-    },
   });
 
   tableInstanceRef.current = tableInstance;
@@ -219,19 +218,44 @@ const TanstackTable = ({ tableId, tableInstanceRef }: Props) => {
   }, [tableInstance.getRowModel().rows]);
 
   useEffect(() => {
-    if (fields) {
-      setTableFields(fields);
-    }
-    if (records) {
+    if (!isRecordsLoading && !isRecordsFetching && records) {
       if (records.length === 0) {
         setHasMore(false);
       } else {
         setTableRecords((prev) => [...prev, ...records]);
       }
     }
-  }, [fields, records]);
+  }, [isRecordsLoading, isRecordsFetching, records]);
 
-  if (isBaseLoading || isRecordsLoading || !tableReady) {
+  useEffect(() => {
+    if (fields) {
+      setTableFields(fields);
+    }
+  }, [fields]);
+
+  useEffect(() => {
+    if (!isBaseLoading && !isRecordsFetching) {
+      setTableReady(true);
+    }
+  }, [isBaseLoading, isRecordsLoading]);
+
+  useEffect(() => {
+    console.log(tableRecords);
+  }, [tableRecords]);
+
+  useEffect(() => {
+    const fetchTableRecords = async () => {
+      setTableReady(false);
+      setTableRecords([]);
+      setOffset(0);
+      setHasMore(true);
+      await refetchRecords(); 
+    };
+
+    fetchTableRecords();
+  }, [tableId]);
+
+  if (isBaseLoading || !tableReady) {
     return <Loading />;
   }
 
