@@ -192,7 +192,7 @@ const TanstackTable = ({ tableId, tableInstanceRef }: Props) => {
           const { scrollHeight, scrollTop, clientHeight } = element;
           if (scrollHeight <= clientHeight) return;
 
-          const threshold = clientHeight * 4;
+          const threshold = clientHeight * 8;
           if (scrollHeight - scrollTop - clientHeight < threshold) {
             loadMoreData();
           }
