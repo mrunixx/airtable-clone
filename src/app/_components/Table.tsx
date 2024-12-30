@@ -51,7 +51,7 @@ const TanstackTable = ({ tableId, tableInstanceRef }: Props) => {
     isFetching: isRecordsFetching,
     refetch: refetchRecords,
   } = api.table.getTableRecordValues.useQuery(
-    { tableId: tableId, offset: offset, limit: 1000 },
+    { tableId: tableId, offset: offset, limit: 400 },
     { refetchOnWindowFocus: false },
   );
 
@@ -169,7 +169,7 @@ const TanstackTable = ({ tableId, tableInstanceRef }: Props) => {
 
   const loadMoreData = () => {
     if (!hasMore || isRecordsLoading || isRecordsFetching) return;
-    const newOffset = offset + 1000;
+    const newOffset = offset + 400;
     setOffset(newOffset);
   };
 
@@ -192,7 +192,7 @@ const TanstackTable = ({ tableId, tableInstanceRef }: Props) => {
           const { scrollHeight, scrollTop, clientHeight } = element;
           if (scrollHeight <= clientHeight) return;
 
-          const threshold = clientHeight * 8;
+          const threshold = clientHeight * 10;
           if (scrollHeight - scrollTop - clientHeight < threshold) {
             loadMoreData();
           }
