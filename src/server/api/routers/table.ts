@@ -1,5 +1,6 @@
 import { RecordValue } from "@prisma/client";
 import { record, undefined, z } from "zod";
+import { faker } from '@faker-js/faker';
 
 import {
   createTRPCRouter,
@@ -244,7 +245,7 @@ export const tableRouter = createTRPCRouter({
       const recordValuesData = records.flatMap((record) =>
         fieldIds.map((fieldId) => ({
           id: `${record.id}-${fieldId}`,
-          data: "",
+          data:  faker.person.fullName(),
           recordId: record.id,
           fieldId: fieldId,
         })),
