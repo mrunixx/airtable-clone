@@ -11,9 +11,11 @@ import TableHeader from "./TableHeader";
 import { api } from "~/trpc/react";
 import Loading from "./Loading";
 import {
+  Dispatch,
   MutableRefObject,
   Ref,
   RefObject,
+  SetStateAction,
   useEffect,
   useMemo,
   useRef,
@@ -30,9 +32,11 @@ type Props = {
   tableInstanceRef:
     | MutableRefObject<Table<Record<string, string>>>
     | MutableRefObject<null>;
+  tableRecords: RecordValue[];
+  setTableRecords: Dispatch<SetStateAction<RecordValue[]>>  
 };
 
-const TanstackTable = ({ tableId, tableInstanceRef }: Props) => {
+const TanstackTable = ({ tableId, tableInstanceRef, tableRecords, setTableRecords }: Props) => {
   const parentRef = useRef<HTMLDivElement>(null);
   const [offset, setOffset] = useState(0);
 
@@ -57,7 +61,6 @@ const TanstackTable = ({ tableId, tableInstanceRef }: Props) => {
 
   const [tableFields, setTableFields] = useState(fields);
   const [tableReady, setTableReady] = useState(false);
-  const [tableRecords, setTableRecords] = useState(records ?? []);
   const [clickable, setClickable] = useState(true);
   const [hasMore, setHasMore] = useState(true);
   const [sortingState, setSortingState] = useState([]);

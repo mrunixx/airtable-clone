@@ -1,20 +1,22 @@
 import { Popover, PopoverTrigger, PopoverContent } from "@nextui-org/react";
-import { MutableRefObject, useState } from "react";
+import { Dispatch, MutableRefObject, SetStateAction, useState } from "react";
 import SortFieldDropdown from "./SortFieldDropdown";
 import { Table } from "@tanstack/react-table";
 import SortTypeDropdown from "./SortTypeDropdown";
+import { RecordValue } from "@prisma/client";
 
 type Props = {
   tableInstanceRef:
     | MutableRefObject<Table<Record<string, string>>>
     | MutableRefObject<null>;
   tableId: string;
+
 };
 
 export default function SortDialog({ tableInstanceRef, tableId }: Props) {
   const [isOpen, setIsOpen] = useState(false);
   const [index, setIndex] = useState(0);
-  const [sort, setSort] = useState("A → Z")
+  const [sort, setSort] = useState("A → Z");
 
   const handleOnClick = () => {
     setIsOpen(false);

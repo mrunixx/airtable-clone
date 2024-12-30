@@ -1,13 +1,17 @@
-import { MutableRefObject } from "react";
+import { Dispatch, MutableRefObject, SetStateAction } from "react";
 import SortDialog from "./SortDialog";
 import { Table } from "@tanstack/react-table";
+import FilterPopup from "./FilterPopup";
+import { RecordValue } from "@prisma/client";
 
 type Props = {
   tableInstanceRef: MutableRefObject<Table<Record<string, string>>> | MutableRefObject<null>;
   tableId: string
+  tableRecords: RecordValue[];
+  setTableRecords: Dispatch<SetStateAction<RecordValue[]>>  
 }
 
-const TableToolBar = ({ tableInstanceRef, tableId } : Props) => {
+const TableToolBar = ({ tableInstanceRef, tableId, tableRecords, setTableRecords } : Props) => {
   return (
     <div className="toolbar flex h-11 w-full items-center pl-3 pr-4">
       <div
@@ -87,25 +91,7 @@ const TableToolBar = ({ tableInstanceRef, tableId } : Props) => {
           Hide fields
         </p>
       </div>
-      <div
-        className="grid-view-options mr-2 flex h-[26px] items-center justify-center rounded-sm px-2 py-1 hover:bg-[#f1f1f2]"
-        role="button"
-      >
-        <svg
-          width="16"
-          height="16"
-          viewBox="0 0 16 16"
-          className="icon flex-none"
-        >
-          <use
-            fill="currentColor"
-            href="/icons/icon_definitions.svg?v=68b23d569e0a0c2f5529fd9b824929e7#FunnelSimple"
-          ></use>
-        </svg>
-        <p className="ml-1 p-0 text-[14px] leading-[18px] text-[#212123] font-light">
-          Filter
-        </p>
-      </div>
+      <FilterPopup tableInstanceRef={tableInstanceRef} tableId={tableId} tableRecords={tableRecords} setTableRecords={setTableRecords}/> 
       <div
         className="grid-view-options mr-2 flex h-[26px] items-center justify-center rounded-sm px-2 py-1 hover:bg-[#f1f1f2]"
         role="button"
@@ -125,7 +111,7 @@ const TableToolBar = ({ tableInstanceRef, tableId } : Props) => {
           Group
         </p>
       </div>
-      <SortDialog tableInstanceRef={tableInstanceRef} tableId={tableId}/> 
+      <SortDialog tableInstanceRef={tableInstanceRef} tableId={tableId} /> 
       <div
         className="grid-view-options mr-2 flex h-[26px] items-center justify-center rounded-sm px-2 py-1 hover:bg-[#f1f1f2]"
         role="button"

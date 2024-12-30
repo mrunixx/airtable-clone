@@ -9,6 +9,7 @@ import TableToolBar from "../_components/TableToolBar";
 import Loading from "../_components/Loading";
 import BaseSidebar from "../_components/BaseSidebar";
 import { useEffect, useRef, useState } from "react";
+import { RecordValue } from "@prisma/client";
 
 const BasePage = () => {
   const tableInstanceRef = useRef(null);
@@ -23,6 +24,7 @@ const BasePage = () => {
 
   const [currentTable, setCurrentTable] = useState(tables?.[0]?.id);
   const [localTables, setLocalTables] = useState(tables);
+  const [tableRecords, setTableRecords] = useState<RecordValue[]>([]);
   useEffect(() => {
     if (!currentTable) {
       setCurrentTable(tables?.[0]?.id);
@@ -32,7 +34,7 @@ const BasePage = () => {
 
   useEffect(() => {
     if (tableInstanceRef.current) {
-      tableInstanceRef.current = null; // Reset table instance on table change
+      tableInstanceRef.current = null; 
     }
   }, [currentTable]);
 
@@ -54,6 +56,8 @@ const BasePage = () => {
         <TableToolBar
           tableInstanceRef={tableInstanceRef}
           tableId={currentTable ?? ""}
+          tableRecords={tableRecords}
+          setTableRecords={setTableRecords} 
         />
         <div className="flex h-full flex-grow overflow-hidden bg-[#f8f8f8]">
           <BaseSidebar />
@@ -61,6 +65,8 @@ const BasePage = () => {
             key={currentTable}
             tableId={currentTable ?? ""}
             tableInstanceRef={tableInstanceRef}
+            tableRecords={tableRecords}
+            setTableRecords={setTableRecords}
           />
         </div>
       </div>

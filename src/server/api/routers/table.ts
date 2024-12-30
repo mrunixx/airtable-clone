@@ -1,6 +1,6 @@
 import { RecordValue } from "@prisma/client";
 import { record, undefined, z } from "zod";
-import { faker } from '@faker-js/faker';
+import { faker } from "@faker-js/faker";
 
 import {
   createTRPCRouter,
@@ -59,12 +59,18 @@ export const tableRouter = createTRPCRouter({
           },
         },
         skip: input.offset,
-        take: input.limit
+        take: input.limit,
       });
       return val;
     }),
   createTableField: protectedProcedure
-    .input(z.object({id: z.string().min(1), tableId: z.string().min(1), name: z.string().min(1) }))
+    .input(
+      z.object({
+        id: z.string().min(1),
+        tableId: z.string().min(1),
+        name: z.string().min(1),
+      }),
+    )
     .mutation(async ({ ctx, input }) => {
       const field = await ctx.db.field.create({
         data: {
@@ -207,8 +213,8 @@ export const tableRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       console.log({
         record: input.recordId,
-        field: input.fieldId
-      })
+        field: input.fieldId,
+      });
       const updatedRecordValue = await ctx.db.recordValue.update({
         where: {
           recordId_fieldId: {
@@ -217,7 +223,7 @@ export const tableRouter = createTRPCRouter({
           },
         },
         data: {
-          data: input.data, 
+          data: input.data,
         },
       });
 
@@ -245,7 +251,7 @@ export const tableRouter = createTRPCRouter({
       const recordValuesData = records.flatMap((record) =>
         fieldIds.map((fieldId) => ({
           id: `${record.id}-${fieldId}`,
-          data:  faker.person.fullName(),
+          data: faker.person.fullName(),
           recordId: record.id,
           fieldId: fieldId,
         })),
@@ -264,5 +270,45 @@ export const tableRouter = createTRPCRouter({
         { timeout: 60000 },
       );
       return result;
+    }),
+  getFilteredContainsRecordValues: protectedProcedure
+    .input(
+      z.object({
+        tableId: z.string().min(1),
+        operator: z.string().min(1),
+        field: z.string().min(1),
+        value: z.string().min(1),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      const val = await ctx.db.record.findMany({
+        where: {
+          tableId: input.tableId,
+          cellValues: {
+            some: {
+              field: {
+                id: input.field,
+              },
+              data: {
+                contains: input.value,
+              },
+            },
+          },
+        },
+        orderBy: {
+          rowIndex: "asc",
+        },
+      });
+      const recordValPromises = val.map(async (r) => {
+        return ctx.db.recordValue.findMany({
+          where: {
+            recordId: r.id,
+          },
+        });
+      });
+      
+      const resolvedRecordVals = await Promise.all(recordValPromises);
+      const recordVals = resolvedRecordVals.flat(); 
+      return recordVals;
     }),
 });

@@ -1,4 +1,4 @@
-import { Dispatch, SetStateAction, useState } from "react";
+import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { api } from "~/trpc/react";
 
 type Props = {
@@ -75,6 +75,11 @@ const TableCell = ({
       setIsEditable(true);
     }
   };
+
+  useEffect(() => {
+    setInitialInput(data ?? "");
+    setInput(data ?? "");
+  }, [data])
 
   return (
     <div
