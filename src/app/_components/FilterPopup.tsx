@@ -52,7 +52,7 @@ export default function FilterPopup({ tableId, tableInstanceRef, tableRecords, s
   } = api.table.getTableRecordValues.useQuery({tableId: tableId, offset: 0, limit: 400});
 
   const handleOnClick = () => {
-    if (input === "") {
+    if (input === "" || shouldFetch) {
       return;
     }
     setShouldFetch(true);
