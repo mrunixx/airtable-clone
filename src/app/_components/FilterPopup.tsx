@@ -5,6 +5,7 @@ import FilterContainsDropdown from "./FilterContainsDropdown";
 import { api } from "~/trpc/react";
 import { Table } from "@tanstack/react-table";
 import { RecordValue } from "@prisma/client";
+import Loading from "./Loading";
 
 type Props = {
   tableInstanceRef:
@@ -155,11 +156,11 @@ export default function FilterPopup({ tableId, tableInstanceRef, tableRecords, s
           </div>
         </div>
         <button
-          className="ml-auto mr-3 h-7 rounded-md bg-[#0d70df] px-4 text-[13px] text-white shadow-elevation-low"
+          className="ml-auto mr-3 h-7 rounded-md bg-[#0d70df] px-4 text-[13px] text-white shadow-elevation-low hover:bg-blue-900"
           type="button"
           onClick={handleOnClick}
         >
-          Filter
+          {shouldFetch ? <>Loading...</> : <>Filter</>}
         </button>
       </PopoverContent>
     </Popover>
