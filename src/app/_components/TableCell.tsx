@@ -86,7 +86,7 @@ const TableCell = ({
   
   return (
     <div
-      className={`h-[31px] w-[176px] border-r border-gray-300 bg-transparent text-[13px] ${searchValue !== "" && input.includes(searchValue) ? "bg-[#fed56e]" : "" }`}
+      className={`h-[31px] w-[176px] border-r border-gray-300 text-[13px] ${searchValue !== "" && input.includes(searchValue) ? "bg-[#fed56e]" : "" }`}
       onDoubleClick={handleDoubleClick}
       onKeyDown={handleEnter}
     >

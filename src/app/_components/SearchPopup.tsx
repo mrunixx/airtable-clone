@@ -53,7 +53,7 @@ const SearchPopup = ({ value, setValue } : Props) => {
             value={input}
             onChange={(e) => setInput(e.target.value)}
           />
-          <div className="ml-auto flex items-center justify-center">
+          <div className="ml-auto flex items-center justify-center" onClick={() => setInput("")}>
             <svg
               width="16"
               height="16"
