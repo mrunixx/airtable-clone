@@ -91,7 +91,7 @@ const TableToolBar = ({ tableInstanceRef, tableId, tableRecords, setTableRecords
           Hide fields
         </p>
       </div>
-      <FilterPopup tableInstanceRef={tableInstanceRef} tableId={tableId} tableRecords={tableRecords} setTableRecords={setTableRecords}/> 
+      <FilterPopup  tableId={tableId} setTableRecords={setTableRecords}/> 
       <div
         className="grid-view-options mr-2 flex h-[26px] items-center justify-center rounded-sm px-2 py-1 hover:bg-[#f1f1f2]"
         role="button"

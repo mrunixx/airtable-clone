@@ -14,6 +14,8 @@ const items = [
   "is not",
   "is empty",
   "is not empty",
+  "greater than",
+  "less than"
 ];
 
 const FilterContainsDropdown = ({ selected, setSelected }: Props) => {

@@ -1,22 +1,16 @@
 import { Popover, PopoverTrigger, PopoverContent } from "@nextui-org/react";
-import { Dispatch, MutableRefObject, SetStateAction, useEffect, useState } from "react";
+import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import FilterFieldDropdown from "./FilterFieldDropdown";
 import FilterContainsDropdown from "./FilterContainsDropdown";
 import { api } from "~/trpc/react";
-import { Table } from "@tanstack/react-table";
 import { RecordValue } from "@prisma/client";
-import Loading from "./Loading";
 
 type Props = {
-  tableInstanceRef:
-    | MutableRefObject<Table<Record<string, string>>>
-    | MutableRefObject<null>;
   tableId: string;
-  tableRecords: RecordValue[];
   setTableRecords: Dispatch<SetStateAction<RecordValue[]>>  
 };
 
-export default function FilterPopup({ tableId, tableInstanceRef, tableRecords, setTableRecords }: Props) {
+export default function FilterPopup({ tableId, setTableRecords }: Props) {
   const { data: fields } = api.table.getTableHeaders.useQuery(
     { tableId: tableId },
     { refetchOnWindowFocus: true },
@@ -32,8 +26,7 @@ export default function FilterPopup({ tableId, tableInstanceRef, tableRecords, s
     data: records,
     isLoading,
     isFetching,
-    refetch
-  } = api.table.getFilteredContainsRecordValues.useQuery(
+  } = api.table.getFilteredRecordValues.useQuery(
     {
       value: input,
       field: field?.id ?? "",
@@ -47,16 +40,13 @@ export default function FilterPopup({ tableId, tableInstanceRef, tableRecords, s
 
   const {
     data: originalRecords,
-    isLoading: isRecordsLoading,
-    isFetching: isRecordsFetching,
   } = api.table.getTableRecordValues.useQuery({tableId: tableId, offset: 0, limit: 400});
 
   const handleOnClick = () => {
-    if (input === "" || shouldFetch) {
+    if (shouldFetch) {
       return;
     }
     setShouldFetch(true);
-    console.log(records);
   };
 
   useEffect(() => {
@@ -70,6 +60,10 @@ export default function FilterPopup({ tableId, tableInstanceRef, tableRecords, s
     setShouldFetch(false);
     setTableRecords(originalRecords ?? []);
   };
+
+  useEffect(() => {
+    setField(fields?.[0]);
+  }, [fields?.[0]])
 
   const handleOpenChange = (change: boolean) => {
     setIsOpen(change);

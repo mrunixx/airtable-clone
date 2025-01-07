@@ -271,16 +271,51 @@ export const tableRouter = createTRPCRouter({
       );
       return result;
     }),
-  getFilteredContainsRecordValues: protectedProcedure
+  getFilteredRecordValues: protectedProcedure
     .input(
       z.object({
         tableId: z.string().min(1),
         operator: z.string().min(1),
         field: z.string().min(1),
-        value: z.string().min(1),
+        value: z.string(),
       }),
     )
     .query(async ({ ctx, input }) => {
+      let dataFilter;
+      const numVal = parseInt(input.value);
+      switch (input.operator) {
+        case "contains":
+          dataFilter = {
+            contains: input.value,
+          };
+          break;
+        case "does not contain":
+          dataFilter = {
+            not: {
+              contains: input.value,
+            },
+          };
+          break;
+        case "is":
+          dataFilter = input.value;
+          break;
+        case "is not":
+          dataFilter = {
+            not: input.value,
+          };
+          break;
+        case "is empty":
+          dataFilter = "";
+          break;
+        case "is not empty":
+          dataFilter = {
+            not: "",
+          };
+          break;
+        default:
+          break;
+      }
+
       const val = await ctx.db.record.findMany({
         where: {
           tableId: input.tableId,
@@ -289,26 +324,34 @@ export const tableRouter = createTRPCRouter({
               field: {
                 id: input.field,
               },
-              data: {
-                contains: input.value,
-              },
+              data: dataFilter,
             },
           },
+        },
+        include: {
+          cellValues: true,
         },
         orderBy: {
           rowIndex: "asc",
         },
       });
-      const recordValPromises = val.map(async (r) => {
-        return ctx.db.recordValue.findMany({
-          where: {
-            recordId: r.id,
-          },
+
+      const recordValues = val.flatMap(
+        (record) => record.cellValues,
+      );
+
+      if (
+        ["greater than", "less than"].includes(input.operator) &&
+        !isNaN(numVal)
+      ) {
+        return recordValues.filter((r) => {
+          const dataNum = parseInt(r.data);
+          return input.operator === "greater than"
+            ? dataNum > numVal
+            : dataNum < numVal;
         });
-      });
-      
-      const resolvedRecordVals = await Promise.all(recordValPromises);
-      const recordVals = resolvedRecordVals.flat(); 
-      return recordVals;
+      }
+
+      return recordValues;
     }),
 });
