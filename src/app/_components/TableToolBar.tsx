@@ -9,9 +9,11 @@ type Props = {
   tableId: string
   tableRecords: RecordValue[];
   setTableRecords: Dispatch<SetStateAction<RecordValue[]>>  
+  filterOn: boolean;
+  setFilterOn: Dispatch<SetStateAction<boolean>>
 }
 
-const TableToolBar = ({ tableInstanceRef, tableId, tableRecords, setTableRecords } : Props) => {
+const TableToolBar = ({ tableInstanceRef, tableId, tableRecords, setTableRecords, filterOn, setFilterOn } : Props) => {
   return (
     <div className="toolbar flex h-11 w-full items-center pl-3 pr-4">
       <div
@@ -91,7 +93,7 @@ const TableToolBar = ({ tableInstanceRef, tableId, tableRecords, setTableRecords
           Hide fields
         </p>
       </div>
-      <FilterPopup  tableId={tableId} setTableRecords={setTableRecords}/> 
+      <FilterPopup  tableId={tableId} setTableRecords={setTableRecords} filterOn={filterOn} setFilterOn={setFilterOn}/> 
       <div
         className="grid-view-options mr-2 flex h-[26px] items-center justify-center rounded-sm px-2 py-1 hover:bg-[#f1f1f2]"
         role="button"

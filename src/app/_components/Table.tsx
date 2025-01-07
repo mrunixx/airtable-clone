@@ -13,8 +13,6 @@ import Loading from "./Loading";
 import {
   Dispatch,
   MutableRefObject,
-  Ref,
-  RefObject,
   SetStateAction,
   useEffect,
   useMemo,
@@ -34,9 +32,10 @@ type Props = {
     | MutableRefObject<null>;
   tableRecords: RecordValue[];
   setTableRecords: Dispatch<SetStateAction<RecordValue[]>>  
+  filterOn: boolean;
 };
 
-const TanstackTable = ({ tableId, tableInstanceRef, tableRecords, setTableRecords }: Props) => {
+const TanstackTable = ({ tableId, tableInstanceRef, tableRecords, setTableRecords, filterOn }: Props) => {
   const parentRef = useRef<HTMLDivElement>(null);
   const [offset, setOffset] = useState(0);
 
@@ -56,14 +55,13 @@ const TanstackTable = ({ tableId, tableInstanceRef, tableRecords, setTableRecord
     refetch: refetchRecords,
   } = api.table.getTableRecordValues.useQuery(
     { tableId: tableId, offset: offset, limit: 400 },
-    { refetchOnWindowFocus: false },
+    { refetchOnWindowFocus: false, enabled: !filterOn}
   );
 
   const [tableFields, setTableFields] = useState(fields);
   const [tableReady, setTableReady] = useState(false);
   const [clickable, setClickable] = useState(true);
   const [hasMore, setHasMore] = useState(true);
-  const [sortingState, setSortingState] = useState([]);
   const transformedData = useMemo(() => {
     const grouped: Record<string, Record<string, string>> = {};
 
@@ -179,13 +177,12 @@ const TanstackTable = ({ tableId, tableInstanceRef, tableRecords, setTableRecord
   const handleFrontendSort = (
     header: Header<Record<string, string>, unknown>,
   ) => {
-    // TODO: make sure table sorts properly
     header.column.toggleSorting();
   };
 
-  useEffect(() => {
-    console.log("Offset changed:", offset);
-  }, [offset]);
+  // useEffect(() => {
+  //   console.log("Offset changed:", offset);
+  // }, [offset]);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -261,6 +258,7 @@ const TanstackTable = ({ tableId, tableInstanceRef, tableRecords, setTableRecord
   return (
     <div
       className="flex w-full overflow-y-scroll border-l border-t border-gray-300"
+      id="table-ref"
       ref={parentRef}
     >
       <div className="flex flex-col">

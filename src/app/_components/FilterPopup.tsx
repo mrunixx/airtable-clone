@@ -7,10 +7,17 @@ import { RecordValue } from "@prisma/client";
 
 type Props = {
   tableId: string;
-  setTableRecords: Dispatch<SetStateAction<RecordValue[]>>  
+  setTableRecords: Dispatch<SetStateAction<RecordValue[]>>;
+  filterOn: boolean;
+  setFilterOn: Dispatch<SetStateAction<boolean>>;
 };
 
-export default function FilterPopup({ tableId, setTableRecords }: Props) {
+export default function FilterPopup({
+  tableId,
+  setTableRecords,
+  filterOn,
+  setFilterOn,
+}: Props) {
   const { data: fields } = api.table.getTableHeaders.useQuery(
     { tableId: tableId },
     { refetchOnWindowFocus: true },
@@ -21,6 +28,7 @@ export default function FilterPopup({ tableId, setTableRecords }: Props) {
   const [operator, setOperator] = useState("contains");
 
   const [shouldFetch, setShouldFetch] = useState(false);
+  const [offset, setOffset] = useState(0);
 
   const {
     data: records,
@@ -32,42 +40,85 @@ export default function FilterPopup({ tableId, setTableRecords }: Props) {
       field: field?.id ?? "",
       operator: operator,
       tableId: tableId,
+      offset: offset,
+      limit: 400,
     },
     {
-      enabled: shouldFetch, 
-    }
+      enabled: shouldFetch && filterOn,
+    },
   );
 
-  const {
-    data: originalRecords,
-  } = api.table.getTableRecordValues.useQuery({tableId: tableId, offset: 0, limit: 400});
+  const { data: originalRecords } = api.table.getTableRecordValues.useQuery({
+    tableId: tableId,
+    offset: 0,
+    limit: 400,
+  });
 
   const handleOnClick = () => {
     if (shouldFetch) {
       return;
     }
     setShouldFetch(true);
+    setFilterOn(true);
+    setTableRecords([]);
+    setOffset(0);
   };
 
   useEffect(() => {
-    if (!isLoading && !isFetching) {
-      setTableRecords(records ?? []);
-      setShouldFetch(false);
+    if (!isLoading && !isFetching && records) {
+      setTableRecords((prev) => [...prev, ...records]);
+      if (records.length < 400) {
+        setShouldFetch(false);
+      }
     }
-  }, [isLoading, isFetching])
+  }, [isLoading, isFetching, records]);
 
   const handleResetFilter = () => {
     setShouldFetch(false);
+    setFilterOn(false);
     setTableRecords(originalRecords ?? []);
   };
 
   useEffect(() => {
     setField(fields?.[0]);
-  }, [fields?.[0]])
+  }, [fields?.[0]]);
 
   const handleOpenChange = (change: boolean) => {
     setIsOpen(change);
   };
+
+  const loadMoreData = () => {
+    if (isLoading || isFetching) return;
+    const newOffset = offset + 400;
+    setOffset(newOffset);
+  };
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const element = document.getElementById("table-ref");
+      if (element) {
+        const handleScroll = () => {
+          const { scrollHeight, scrollTop, clientHeight } = element;
+          if (scrollHeight <= clientHeight) return;
+
+          const threshold = clientHeight * 10;
+          if (scrollHeight - scrollTop - clientHeight < threshold) {
+            loadMoreData();
+          }
+        };
+
+        element.addEventListener("scroll", handleScroll);
+
+        clearInterval(interval);
+
+        return () => {
+          element.removeEventListener("scroll", handleScroll);
+        };
+      }
+    }, 500);
+
+    return () => clearInterval(interval);
+  }, [loadMoreData]);
 
   return (
     <Popover

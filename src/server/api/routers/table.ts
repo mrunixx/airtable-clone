@@ -278,6 +278,8 @@ export const tableRouter = createTRPCRouter({
         operator: z.string().min(1),
         field: z.string().min(1),
         value: z.string(),
+        offset: z.number(),
+        limit: z.number()
       }),
     )
     .query(async ({ ctx, input }) => {
@@ -334,6 +336,8 @@ export const tableRouter = createTRPCRouter({
         orderBy: {
           rowIndex: "asc",
         },
+        skip: input.offset,
+        take: input.limit
       });
 
       const recordValues = val.flatMap(
