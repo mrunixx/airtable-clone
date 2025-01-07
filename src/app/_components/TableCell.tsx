@@ -16,6 +16,7 @@ type Props = {
   recordId?: string | undefined;
   data?: string | undefined;
   rowIndex?: string | undefined;
+  searchValue: string;
 };
 
 const TableCell = ({
@@ -24,6 +25,7 @@ const TableCell = ({
   recordId,
   data,
   rowIndex,
+  searchValue
 }: Props) => {
   const [input, setInput] = useState(data ?? "");
   const [initialInput, setInitialInput] = useState(data ?? "");
@@ -81,9 +83,10 @@ const TableCell = ({
     setInput(data ?? "");
   }, [data])
 
+  
   return (
     <div
-      className="h-[31px] w-[176px] border-r border-gray-300 bg-transparent text-[13px]"
+      className={`h-[31px] w-[176px] border-r border-gray-300 bg-transparent text-[13px] ${searchValue !== "" && input.includes(searchValue) ? "bg-[#fed56e]" : "" }`}
       onDoubleClick={handleDoubleClick}
       onKeyDown={handleEnter}
     >

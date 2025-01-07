@@ -1,8 +1,9 @@
-import { Dispatch, MutableRefObject, SetStateAction } from "react";
+import { Dispatch, MutableRefObject, SetStateAction, useEffect } from "react";
 import SortDialog from "./SortDialog";
 import { Table } from "@tanstack/react-table";
 import FilterPopup from "./FilterPopup";
 import { RecordValue } from "@prisma/client";
+import SearchPopup from "./SearchPopup";
 
 type Props = {
   tableInstanceRef: MutableRefObject<Table<Record<string, string>>> | MutableRefObject<null>;
@@ -11,9 +12,12 @@ type Props = {
   setTableRecords: Dispatch<SetStateAction<RecordValue[]>>  
   filterOn: boolean;
   setFilterOn: Dispatch<SetStateAction<boolean>>
+  value: string,
+  setSearchValue: Dispatch<SetStateAction<string>>
 }
 
-const TableToolBar = ({ tableInstanceRef, tableId, tableRecords, setTableRecords, filterOn, setFilterOn } : Props) => {
+const TableToolBar = ({ tableInstanceRef, tableId, tableRecords, setTableRecords, filterOn, setFilterOn, value, setSearchValue } : Props) => {
+
   return (
     <div className="toolbar flex h-11 w-full items-center pl-3 pr-4">
       <div
@@ -158,19 +162,7 @@ const TableToolBar = ({ tableInstanceRef, tableId, tableRecords, setTableRecords
           Share and sync
         </p>
       </div>
-      <div className="ml-auto flex items-center justify-center" role="button">
-        <svg
-          width="16"
-          height="16"
-          viewBox="0 0 16 16"
-          className="noevents flex-none font-light hover:font-strong"
-        >
-          <use
-            fill="currentColor"
-            href="/icons/icon_definitions.svg?v=68b23d569e0a0c2f5529fd9b824929e7#MagnifyingGlass"
-          ></use>
-        </svg>
-      </div>
+      <SearchPopup value={value} setValue={setSearchValue}/> 
     </div>
   );
 };

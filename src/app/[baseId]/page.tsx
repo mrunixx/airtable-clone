@@ -26,6 +26,7 @@ const BasePage = () => {
   const [localTables, setLocalTables] = useState(tables);
   const [tableRecords, setTableRecords] = useState<RecordValue[]>([]);
   const [filterOn, setFilterOn] = useState(false);
+  const [searchValue, setSearchValue] = useState("");
 
   useEffect(() => {
     if (!currentTable) {
@@ -62,6 +63,8 @@ const BasePage = () => {
           setTableRecords={setTableRecords} 
           filterOn={filterOn}
           setFilterOn={setFilterOn}
+          value={searchValue}
+          setSearchValue={setSearchValue}
         />
         <div className="flex h-full flex-grow overflow-hidden bg-[#f8f8f8]">
           <BaseSidebar />
@@ -72,6 +75,7 @@ const BasePage = () => {
             tableRecords={tableRecords}
             setTableRecords={setTableRecords}
             filterOn={filterOn}
+            searchValue={searchValue}
           />
         </div>
       </div>

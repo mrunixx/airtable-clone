@@ -33,9 +33,10 @@ type Props = {
   tableRecords: RecordValue[];
   setTableRecords: Dispatch<SetStateAction<RecordValue[]>>  
   filterOn: boolean;
+  searchValue: string;
 };
 
-const TanstackTable = ({ tableId, tableInstanceRef, tableRecords, setTableRecords, filterOn }: Props) => {
+const TanstackTable = ({ tableId, tableInstanceRef, tableRecords, setTableRecords, filterOn, searchValue }: Props) => {
   const parentRef = useRef<HTMLDivElement>(null);
   const [offset, setOffset] = useState(0);
 
@@ -92,12 +93,13 @@ const TanstackTable = ({ tableId, tableInstanceRef, tableRecords, setTableRecord
               data={row.original[field.id]}
               recordId={row.original.recordId}
               rowIndex={tableRecords[row.index]?.recordId}
+              searchValue={searchValue}
             />
           );
         },
       })) ?? []
     );
-  }, [tableFields]);
+  }, [tableFields, searchValue, tableRecords]);
 
   const handleAddRecord = async () => {
     if (tableRecords && clickable) {
