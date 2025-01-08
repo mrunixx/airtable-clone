@@ -1,7 +1,13 @@
-import { useState } from "react";
+import { Dispatch, SetStateAction, useState } from "react";
 import CreateOptionButton from "./CreateOptionButton";
+import { QueryObserverResult, RefetchOptions } from "@tanstack/react-query";
 
-const SidebarCreate = () => {
+type Props = {
+  tableId: string
+  setRefetchView: Dispatch<SetStateAction<boolean>>
+}
+
+const SidebarCreate = ({ tableId, setRefetchView } : Props) => {
   const [open, setOpen] = useState(true);
 
 
@@ -27,7 +33,7 @@ const SidebarCreate = () => {
       {open && (
         <div className="create-options flex flex-col">
           <div className="flex flex-col items-center">
-            <CreateOptionButton title="Grid">
+            <CreateOptionButton title="Grid" tableId={tableId} setRefetchView={setRefetchView}>
               <svg
                 width="16"
                 height="16"

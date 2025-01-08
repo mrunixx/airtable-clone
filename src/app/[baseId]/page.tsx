@@ -16,14 +16,20 @@ const BasePage = () => {
   const baseId = usePathname()?.slice(1);
   const { data: base, isLoading: isBaseLoading } = api.base.getBase.useQuery(
     { id: baseId },
-    { enabled: !!baseId },
+    { enabled: !!baseId, refetchOnWindowFocus: false },
   );
 
   const { data: tables, isLoading: isTablesLoading } =
-    api.table.getTables.useQuery({ baseId: baseId }, { enabled: !!baseId });
+    api.table.getTables.useQuery({ baseId: baseId }, { enabled: !!baseId, refetchOnWindowFocus: false });
 
   const [currentTable, setCurrentTable] = useState(tables?.[0]?.id);
-  const [localTables, setLocalTables] = useState(tables);
+  const [localTables, setLocalTables] = useState(() =>
+    tables?.map(({ id, baseId, name }) => ({
+      id,
+      baseId,
+      name,
+    })),
+  );
   const [tableRecords, setTableRecords] = useState<RecordValue[]>([]);
   const [filterOn, setFilterOn] = useState(false);
   const [searchValue, setSearchValue] = useState("");
@@ -32,12 +38,12 @@ const BasePage = () => {
     if (!currentTable) {
       setCurrentTable(tables?.[0]?.id);
     }
-    setLocalTables(tables)
+    setLocalTables(tables);
   }, [tables]);
 
   useEffect(() => {
     if (tableInstanceRef.current) {
-      tableInstanceRef.current = null; 
+      tableInstanceRef.current = null;
     }
   }, [currentTable]);
 
@@ -60,14 +66,19 @@ const BasePage = () => {
           tableInstanceRef={tableInstanceRef}
           tableId={currentTable ?? ""}
           tableRecords={tableRecords}
-          setTableRecords={setTableRecords} 
+          setTableRecords={setTableRecords}
           filterOn={filterOn}
           setFilterOn={setFilterOn}
           value={searchValue}
           setSearchValue={setSearchValue}
         />
         <div className="flex h-full flex-grow overflow-hidden bg-[#f8f8f8]">
-          <BaseSidebar />
+          <BaseSidebar
+            tableInstanceRef={tableInstanceRef}
+            tableId={currentTable ?? ""}
+            tableRecords={tableRecords}
+            setTableRecords={setTableRecords}
+          />
           <Table
             key={currentTable}
             tableId={currentTable ?? ""}

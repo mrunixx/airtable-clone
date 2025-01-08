@@ -20,7 +20,7 @@ export default function FilterPopup({
 }: Props) {
   const { data: fields } = api.table.getTableHeaders.useQuery(
     { tableId: tableId },
-    { refetchOnWindowFocus: true },
+    { refetchOnWindowFocus: false },
   );
   const [input, setInput] = useState("");
   const [isOpen, setIsOpen] = useState(false);
@@ -52,6 +52,8 @@ export default function FilterPopup({
     tableId: tableId,
     offset: 0,
     limit: 400,
+  }, {
+    refetchOnWindowFocus: false
   });
 
   const handleOnClick = () => {

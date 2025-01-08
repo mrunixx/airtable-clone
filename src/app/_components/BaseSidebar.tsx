@@ -1,15 +1,60 @@
+import { api } from "~/trpc/react";
 import SidebarCreate from "./SidebarCreate";
 import SideViewSearch from "./SideViewSearch";
+import TableViewButton from "./TableViewButton";
+import Loading from "./Loading";
+import { Dispatch, MutableRefObject, SetStateAction, useState } from "react";
+import { Table } from "@tanstack/react-table";
+import { RecordValue } from "@prisma/client";
 
-const BaseSidebar = () => {
+type Props = {
+  tableInstanceRef:
+    | MutableRefObject<Table<Record<string, string>>>
+    | MutableRefObject<null>;
+  tableId: string;
+  tableRecords: RecordValue[];
+  setTableRecords: Dispatch<SetStateAction<RecordValue[]>>;
+};
+
+const BaseSidebar = ({
+  tableId,
+  tableInstanceRef,
+  tableRecords,
+  setTableRecords,
+}: Props) => {
+  const [refetchView, setRefetchView] = useState(false)
+  const { data: table, isLoading } = api.table.getTable.useQuery({
+    tableId: tableId,
+  }, {refetchOnWindowFocus: false, enabled: !!refetchView});
+  const { data: originalRecords } = api.table.getTableRecordValues.useQuery({
+    tableId: tableId,
+    offset: 0,
+    limit: 400,
+  }, {
+    refetchOnWindowFocus: false
+  });
+
+  const [selectedView, setSelectedView] = useState("");
+
+  const handleReset = () => {
+    setSelectedView("");
+    setTableRecords(originalRecords ?? []);
+    tableInstanceRef.current?.getAllColumns()[0]?.clearSorting()
+  };
+
+  if (isLoading) {
+    return <Loading />;
+  }
+
   return (
-    <div className="flex w-[260px] min-w-[260px] flex-col bg-white border-t pt-2">
+    <div className="flex w-[260px] min-w-[260px] flex-col border-t bg-white pt-2">
       <SideViewSearch />
-      <div className="curr-view mx-4 mt-2 bg-[#d5f1ff] rounded-sm flex">
+      <div className="curr-view mx-4 mt-2 flex flex-col gap-2 rounded-sm">
         <div
           tabIndex={0}
           role="button"
-          className="flex h-8 w-full items-center p-2"
+          className={`flex h-8 w-full items-center p-2 hover:bg-[#d5f1ff] ${selectedView === "" ? "bg-[#d5f1ff]" : ""}`}
+          onClick={handleReset}
         >
           <svg
             width="16"
@@ -22,7 +67,7 @@ const BaseSidebar = () => {
               href="/icons/icon_definitions.svg?v=68b23d569e0a0c2f5529fd9b824929e7#GridFeature"
             ></use>
           </svg>
-          <div className={`mx-2 text-sm`}>Grid View</div>
+          <div className={`mx-2 text-sm`}>Normal View</div>
           <svg
             width="14"
             height="14"
@@ -35,8 +80,21 @@ const BaseSidebar = () => {
             ></use>
           </svg>
         </div>
+        {table?.views.map((view, index) => {
+          return (
+            <TableViewButton
+              key={index}
+              view={view}
+              selectedView={selectedView}
+              setSelectedView={setSelectedView}
+              tableInstanceRef={tableInstanceRef}
+              tableRecords={tableRecords}
+              setTableRecords={setTableRecords}
+            />
+          );
+        })}
       </div>
-      <SidebarCreate />
+      <SidebarCreate tableId={tableId} setRefetchView={setRefetchView}/>
     </div>
   );
 };

@@ -1,5 +1,5 @@
 import { RecordValue } from "@prisma/client";
-import { record, undefined, z } from "zod";
+import { record, undefined, z, ZodString } from "zod";
 import { faker } from "@faker-js/faker";
 
 import {
@@ -27,6 +27,18 @@ export const tableRouter = createTRPCRouter({
         where: {
           baseId: input.baseId,
         },
+      });
+    }),
+  getTable: protectedProcedure
+    .input(z.object({ tableId: z.string().min(1) }))
+    .query(async ({ ctx, input }) => {
+      return ctx.db.table.findUnique({
+        where: {
+          id: input.tableId 
+        },
+        include: {
+          views: true
+        }
       });
     }),
   getTableHeaders: protectedProcedure
@@ -279,7 +291,7 @@ export const tableRouter = createTRPCRouter({
         field: z.string().min(1),
         value: z.string(),
         offset: z.number(),
-        limit: z.number()
+        limit: z.number(),
       }),
     )
     .query(async ({ ctx, input }) => {
@@ -337,12 +349,10 @@ export const tableRouter = createTRPCRouter({
           rowIndex: "asc",
         },
         skip: input.offset,
-        take: input.limit
+        take: input.limit,
       });
 
-      const recordValues = val.flatMap(
-        (record) => record.cellValues,
-      );
+      const recordValues = val.flatMap((record) => record.cellValues);
 
       if (
         ["greater than", "less than"].includes(input.operator) &&
@@ -357,5 +367,30 @@ export const tableRouter = createTRPCRouter({
       }
 
       return recordValues;
+    }),
+  createTableView: protectedProcedure
+    .input(
+      z.object({
+        title: z.string().min(1),
+        tableId: z.string().min(1),
+        filterOperator: z.string().min(1),
+        filterFieldId: z.string().min(1),
+        filterValue: z.string().min(0),
+        sortOperator: z.string().min(1),
+        sortFieldId: z.string().min(1),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      return await ctx.db.view.create({
+        data: {
+          title: input.title,
+          tableId: input.tableId,
+          filterOp: input.filterOperator,
+          filterFieldId: input.filterFieldId,
+          filterValue: input.filterValue,
+          sortOp: input.sortOperator,
+          sortFieldId: input.sortFieldId,
+        },
+      });
     }),
 });
