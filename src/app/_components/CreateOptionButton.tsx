@@ -27,7 +27,7 @@ const CreateOptionButton = ({ title, children, tableId, setRefetchView }: Props)
         ></use>
       </svg>
     </div>
-  ) : (<ViewPopUp title={title} tableId={tableId || ""} setRefetchView={setRefetchView}>{children}</ViewPopUp>);
+  ) : (<ViewPopUp title={title} tableId={tableId ?? ""} setRefetchView={setRefetchView}>{children}</ViewPopUp>);
 };
 
 export default CreateOptionButton;

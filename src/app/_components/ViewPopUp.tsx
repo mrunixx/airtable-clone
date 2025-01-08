@@ -36,14 +36,14 @@ const ViewPopUp = ({ title, children, tableId, setRefetchView }: Props) => {
     setInput("");
   };
 
-  const handleSetPreset = () => {
-    viewMutation.mutateAsync({
+  const handleSetPreset = async () => {
+    await viewMutation.mutateAsync({
       title: viewTitle,
       tableId: tableId,
-      filterFieldId: filterField?.id || " ",
+      filterFieldId: filterField?.id ?? " ",
       filterOperator: filterOperator,
       filterValue: input,
-      sortFieldId: fields?.[index]?.id || " ",
+      sortFieldId: fields?.[index]?.id ?? " ",
       sortOperator: sort,
     }).then(() => {
       if (setRefetchView) {

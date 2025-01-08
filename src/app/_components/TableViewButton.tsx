@@ -36,7 +36,7 @@ const TableViewButton = ({ view, selectedView, setSelectedView, tableInstanceRef
 
   const handleClick = () => {
     setSelectedView(view.id);
-    setTableRecords(records || []);
+    setTableRecords(records ?? []);
     if (view.sortOp === "A → Z") {
       tableInstanceRef.current?.getAllColumns()[0]?.toggleSorting(false, false);
     } else {
