@@ -6,7 +6,7 @@ type Props = {
   title: string;
   children?: React.ReactNode;
   tableId?: string;
-  setRefetchView?: Dispatch<SetStateAction<boolean>>
+  setRefetchView?: Dispatch<SetStateAction<number>>
 };
 
 

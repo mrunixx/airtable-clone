@@ -3,7 +3,7 @@ import SidebarCreate from "./SidebarCreate";
 import SideViewSearch from "./SideViewSearch";
 import TableViewButton from "./TableViewButton";
 import Loading from "./Loading";
-import { Dispatch, MutableRefObject, SetStateAction, useState } from "react";
+import { Dispatch, MutableRefObject, SetStateAction, useEffect, useState } from "react";
 import { Table } from "@tanstack/react-table";
 import { RecordValue } from "@prisma/client";
 
@@ -22,10 +22,10 @@ const BaseSidebar = ({
   tableRecords,
   setTableRecords,
 }: Props) => {
-  const [refetchView, setRefetchView] = useState(false)
-  const { data: table, isLoading } = api.table.getTable.useQuery({
+  const [refetchView, setRefetchView] = useState(0)
+  const { data: table, isLoading, refetch } = api.table.getTable.useQuery({
     tableId: tableId,
-  }, {refetchOnWindowFocus: false, enabled: !!refetchView});
+  }, {refetchOnWindowFocus: false});
   const { data: originalRecords } = api.table.getTableRecordValues.useQuery({
     tableId: tableId,
     offset: 0,
@@ -41,6 +41,10 @@ const BaseSidebar = ({
     setTableRecords(originalRecords ?? []);
     tableInstanceRef.current?.getAllColumns()[0]?.clearSorting()
   };
+
+  useEffect(() => {
+    refetch().catch(() => console.log("failed refetch of views"));
+  }, [refetchView])
 
   if (isLoading) {
     return <Loading />;

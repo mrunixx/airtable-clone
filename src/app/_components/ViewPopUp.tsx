@@ -10,7 +10,7 @@ type Props = {
   title: string;
   children?: React.ReactNode;
   tableId: string;
-  setRefetchView?: Dispatch<SetStateAction<boolean>>
+  setRefetchView?: Dispatch<SetStateAction<number>>
 };
 
 const ViewPopUp = ({ title, children, tableId, setRefetchView }: Props) => {
@@ -47,7 +47,7 @@ const ViewPopUp = ({ title, children, tableId, setRefetchView }: Props) => {
       sortOperator: sort,
     }).then(() => {
       if (setRefetchView) {
-        setRefetchView(true);
+        setRefetchView((prev) => prev + 1);
       }
     });
     setIsOpen(false);

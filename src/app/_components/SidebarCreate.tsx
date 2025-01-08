@@ -4,7 +4,7 @@ import { QueryObserverResult, RefetchOptions } from "@tanstack/react-query";
 
 type Props = {
   tableId: string
-  setRefetchView: Dispatch<SetStateAction<boolean>>
+  setRefetchView: Dispatch<SetStateAction<number>>
 }
 
 const SidebarCreate = ({ tableId, setRefetchView } : Props) => {
