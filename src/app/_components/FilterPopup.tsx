@@ -12,7 +12,9 @@ type Props = {
   setFilterOn: Dispatch<SetStateAction<boolean>>;
   selectedView: string;
   sort: string;
+  setSort: Dispatch<SetStateAction<string>>;
   sortFieldId: string;
+  setSortFieldId: Dispatch<SetStateAction<string>>;
 };
 
 export default function FilterPopup({
@@ -22,7 +24,9 @@ export default function FilterPopup({
   setFilterOn,
   selectedView,
   sort,
+  setSort,
   sortFieldId,
+  setSortFieldId
 }: Props) {
   const { data: fields } = api.table.getTableHeaders.useQuery(
     { tableId: tableId },
@@ -96,15 +100,27 @@ export default function FilterPopup({
     });
   };
 
-  useEffect(() => {
-    setShouldFetch(true);
-  }, [selectedView]);
+  const handleResetFilter = () => {
+    setShouldFetch(false);
+    setFilterOn(false);
+    setTableRecords(originalRecords ?? []);
+  };
+
+  const handleOpenChange = (change: boolean) => {
+    setIsOpen(change);
+  };
+
+  const loadMoreData = () => {
+    if (isLoading || isFetching) return;
+    const newOffset = offset + 400;
+    setOffset(newOffset);
+  };
 
   useEffect(() => {
     if (sortFieldId !== "") {
       void updateTableView();
     }
-  }, [sortFieldId]);
+  }, [sortFieldId, sort]);
 
   useEffect(() => {
     if (!isLoading && !isFetching && records) {
@@ -118,7 +134,13 @@ export default function FilterPopup({
   useEffect(() => {
     if (!isViewLoading && !isViewFetching && view) {
       if (view.filterFieldId !== "") {
-        setInput(view.filterValue)
+        setInput(view.filterValue);
+        setOperator(view.filterOp);
+        setField(() => {
+          return fields?.find((f) => f.id === view.filterFieldId);
+        })
+        setSort(view.sortOp);
+        setSortFieldId(view.sortFieldId);
         setFilterOn(true);
         setShouldFetch(true);
       } else {
@@ -128,31 +150,27 @@ export default function FilterPopup({
     }
   }, [isViewLoading, isViewFetching, view])
 
-  const handleResetFilter = () => {
-    setShouldFetch(false);
-    setFilterOn(false);
-    setTableRecords(originalRecords ?? []);
-  };
-
   useEffect(() => {
     setField(fields?.[0]);
   }, [fields?.[0]]);
 
-  const handleOpenChange = (change: boolean) => {
-    setIsOpen(change);
-  };
-
-  const loadMoreData = () => {
-    if (isLoading || isFetching) return;
-    const newOffset = offset + 400;
-    setOffset(newOffset);
-  };
+  useEffect(() => {
+    if (selectedView !== "") {
+      console.log("moving to non og table")
+      setShouldFetch(true);
+      setFilterOn(true);
+      setTableRecords([]);
+      setOffset(0);
+    } else {
+      console.log("moving to og table")
+      setShouldFetch(false);
+      setFilterOn(false);
+    }
+  }, [selectedView]);
 
   useEffect(() => {
-    // check if filter exists
-    // load filter onto popup
-    // make filter button green
-  }, [selectedView]);
+    setTableRecords([]);
+  }, [sort])
 
   useEffect(() => {
     const interval = setInterval(() => {

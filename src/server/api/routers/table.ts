@@ -338,9 +338,7 @@ export const tableRouter = createTRPCRouter({
           tableId: input.tableId,
           cellValues: {
             some: {
-              field: {
-                id: input.filterFieldId,
-              },
+              fieldId: input.filterFieldId,
               data: dataFilter,
             },
           },
@@ -348,11 +346,11 @@ export const tableRouter = createTRPCRouter({
         include: {
           cellValues: true,
         },
-        orderBy: {
-          rowIndex: "asc",
-        },
-        skip: input.offset,
-        take: input.limit,
+        orderBy: [
+          {
+            rowIndex: "asc",
+          },
+        ],
       });
 
       switch (input.sortOp) {
@@ -382,7 +380,8 @@ export const tableRouter = createTRPCRouter({
           break;
       }
 
-      const recordValues = val.flatMap((record) => record.cellValues);
+      const newVal = val.slice(input.offset, input.offset + input.limit);
+      const recordValues = newVal.flatMap((record) => record.cellValues);
 
       if (
         ["greater than", "less than"].includes(input.filterOperator) &&
@@ -448,7 +447,7 @@ export const tableRouter = createTRPCRouter({
     .query(async ({ ctx, input }) => {
       return ctx.db.view.findUnique({
         where: {
-          id: input.viewId
+          id: input.viewId,
         },
       });
     }),

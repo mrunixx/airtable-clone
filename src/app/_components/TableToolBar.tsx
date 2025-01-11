@@ -36,7 +36,7 @@ const TableToolBar = ({
   setSearchValue,
   selectedView,
 }: Props) => {
-  const [sort, setSort] = useState("A → Z");
+  const [sort, setSort] = useState("");
   const [sortFieldId, setSortFieldId] = useState("");
   return (
     <div className="toolbar flex h-11 w-full items-center pl-3 pr-4">
@@ -124,7 +124,9 @@ const TableToolBar = ({
         setFilterOn={setFilterOn}
         selectedView={selectedView}
         sort={sort}
+        setSort={setSort}
         sortFieldId={sortFieldId}
+        setSortFieldId={setSortFieldId}
       />
       <div
         className="grid-view-options mr-2 flex h-[26px] items-center justify-center rounded-sm px-2 py-1 hover:bg-[#f1f1f2]"

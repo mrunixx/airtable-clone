@@ -1,5 +1,5 @@
 import { Popover, PopoverTrigger, PopoverContent } from "@nextui-org/react";
-import { Dispatch, MutableRefObject, SetStateAction, useState } from "react";
+import { Dispatch, MutableRefObject, SetStateAction, useEffect, useState } from "react";
 import SortFieldDropdown from "./SortFieldDropdown";
 import { Table } from "@tanstack/react-table";
 import SortTypeDropdown from "./SortTypeDropdown";
@@ -28,6 +28,7 @@ export default function SortDialog({
 }: Props) {
   const [isOpen, setIsOpen] = useState(false);
   const [index, setIndex] = useState(0);
+  const [sortDialogEntry, setSortDialogEntry] = useState("A → Z")
 
   const { data: fields, isLoading: isBaseLoading } =
     api.table.getTableHeaders.useQuery(
@@ -38,6 +39,7 @@ export default function SortDialog({
   const handleOnClick = () => {
     setIsOpen(false);
     setSortFieldId(fields?.[index]?.id ?? "");
+    setSort(sortDialogEntry)
   };
 
   const handleOpenChange = (change: boolean) => {
@@ -95,7 +97,7 @@ export default function SortDialog({
               setSelected={setIndex}
               fields={fields ?? []}
             />
-            <SortTypeDropdown sort={sort} setSort={setSort} />
+            <SortTypeDropdown sort={sortDialogEntry} setSort={setSortDialogEntry} />
             <div className="cursorp-pointer flex h-7 w-7 items-center justify-center rounded-sm hover:bg-gray-200">
               <svg
                 width="16"
