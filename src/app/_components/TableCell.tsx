@@ -1,4 +1,11 @@
-import { Dispatch, RefObject, SetStateAction, useEffect, useRef, useState } from "react";
+import {
+  Dispatch,
+  RefObject,
+  SetStateAction,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { api } from "~/trpc/react";
 
 type Props = {
@@ -25,13 +32,11 @@ const TableCell = ({
   recordId,
   data,
   rowIndex,
-  searchValue
+  searchValue,
 }: Props) => {
   const [input, setInput] = useState(data ?? "");
   const [initialInput, setInitialInput] = useState(data ?? "");
-  const [isEditable, setIsEditable] = useState(false);
-
-  const inputRef : RefObject<HTMLInputElement> = useRef(null);
+  const inputRef: RefObject<HTMLInputElement> = useRef(null);
 
   const cellMutation = api.table.updateCellValue.useMutation();
 
@@ -57,49 +62,33 @@ const TableCell = ({
             console.log("Input saved at: ", fieldId, recordId);
           } catch {
             if (attempt < 3) {
-              setTimeout(() => void saveToDb(attempt + 1), 3000); 
+              setTimeout(() => void saveToDb(attempt + 1), 3000);
             } else {
               console.error("Failed to save input after 3 attempts.");
             }
           }
         };
-  
+
         await saveToDb();
       }
     }
-    setIsEditable(false);
   };
 
-  const handleDoubleClick = () => {
-    setIsEditable(true);
-  };
-
-  const handleEnter = (e: React.KeyboardEvent) => {
-    if (e.key !== "Tab") {
-      setIsEditable(true);
-    } else {
-      const form = inputRef.current?.form;
-      const nextElement = form
-        ?.querySelector<HTMLInputElement>(
-          `input[tabindex="${Number(inputRef.current?.tabIndex) + 1}"]`
-        );
-
-      console.log(nextElement);
-      nextElement?.focus();
+  const handleEnter = async (e: React.KeyboardEvent) => {
+    if (e.key === "Tab") {
+      await handleDbSave(); 
     }
   };
 
   useEffect(() => {
     setInitialInput(data ?? "");
     setInput(data ?? "");
-  }, [data])
+  }, [data]);
 
-  
   return (
     <div
-      className={`h-[31px] w-[176px] border-r border-gray-300 text-[13px] ${searchValue !== "" && input.includes(searchValue) ? "bg-[#fed56e]" : "" }`}
-      onDoubleClick={handleDoubleClick}
-      onKeyDown={handleEnter}
+      className={`h-[31px] w-[176px] border-r border-gray-300 text-[13px] ${searchValue !== "" && input.includes(searchValue) ? "bg-[#fed56e]" : ""}`}
+      tabIndex={-1}
     >
       <input
         type="text"
@@ -107,7 +96,7 @@ const TableCell = ({
         onChange={(e) => setInput(e.target.value)}
         onBlur={handleDbSave}
         className="h-[31px] w-full cursor-default bg-transparent p-1.5 focus:bg-white"
-        readOnly={!isEditable}
+        onKeyDown={handleEnter}
         ref={inputRef}
       />
     </div>

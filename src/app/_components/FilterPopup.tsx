@@ -159,12 +159,10 @@ export default function FilterPopup({
 
   useEffect(() => {
     if (selectedView !== "") {
-      console.log("moving to non og table")
       setShouldFetch(true);
       setTableRecords([]);
       setOffset(0);
     } else {
-      console.log("moving to og table")
       setShouldFetch(false);
       setFilterOn(false);
     }
