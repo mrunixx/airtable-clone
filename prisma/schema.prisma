@@ -132,4 +132,5 @@ model View {
     sortFieldId     String
     table           Table @relation(fields: [tableId], references: [id])
     tableId         String
+    createdAt       DateTime @default(now())
 }

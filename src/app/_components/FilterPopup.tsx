@@ -1,5 +1,5 @@
 import { Popover, PopoverTrigger, PopoverContent } from "@nextui-org/react";
-import { Dispatch, SetStateAction, useEffect, useState } from "react";
+import { Dispatch, SetStateAction, use, useEffect, useState } from "react";
 import FilterFieldDropdown from "./FilterFieldDropdown";
 import FilterContainsDropdown from "./FilterContainsDropdown";
 import { api } from "~/trpc/react";
@@ -46,6 +46,7 @@ export default function FilterPopup({
     data: records,
     isLoading,
     isFetching,
+    refetch
   } = api.table.getFilteredRecordValues.useQuery(
     {
       filterValue: input,
@@ -82,7 +83,6 @@ export default function FilterPopup({
     if (shouldFetch) {
       return;
     }
-    void updateTableView();
     setShouldFetch(true);
     setFilterOn(true);
     setTableRecords([]);
@@ -117,9 +117,10 @@ export default function FilterPopup({
   };
 
   useEffect(() => {
-    if (sortFieldId !== "") {
+    if (sortFieldId !== "" && sort !== "") {
       void updateTableView();
     }
+    setShouldFetch(true);
   }, [sortFieldId, sort]);
 
   useEffect(() => {
@@ -143,9 +144,11 @@ export default function FilterPopup({
         setSortFieldId(view.sortFieldId);
         setFilterOn(true);
         setShouldFetch(true);
+        void refetch();
       } else {
         setFilterOn(false);
         setShouldFetch(false);
+        setTableRecords(originalRecords ?? []);
       }
     }
   }, [isViewLoading, isViewFetching, view])
@@ -158,7 +161,6 @@ export default function FilterPopup({
     if (selectedView !== "") {
       console.log("moving to non og table")
       setShouldFetch(true);
-      setFilterOn(true);
       setTableRecords([]);
       setOffset(0);
     } else {
@@ -198,6 +200,17 @@ export default function FilterPopup({
 
     return () => clearInterval(interval);
   }, [loadMoreData]);
+
+  useEffect(() => {
+    setTableRecords(originalRecords ?? [])
+  }, [])
+
+  useEffect(() => {
+    console.log({
+      shouldFetch,
+      filterOn
+    })
+  })
 
   return (
     <Popover
