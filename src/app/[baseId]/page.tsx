@@ -33,6 +33,7 @@ const BasePage = () => {
   const [tableRecords, setTableRecords] = useState<RecordValue[]>([]);
   const [filterOn, setFilterOn] = useState(false);
   const [searchValue, setSearchValue] = useState("");
+  const [selectedView, setSelectedView] = useState("")
 
   useEffect(() => {
     if (!currentTable) {
@@ -71,6 +72,7 @@ const BasePage = () => {
           setFilterOn={setFilterOn}
           value={searchValue}
           setSearchValue={setSearchValue}
+          selectedView={selectedView}
         />
         <div className="flex h-full flex-grow overflow-hidden bg-[#f8f8f8]">
           <BaseSidebar
@@ -78,6 +80,8 @@ const BasePage = () => {
             tableId={currentTable ?? ""}
             tableRecords={tableRecords}
             setTableRecords={setTableRecords}
+            selectedView={selectedView}
+            setSelectedView={setSelectedView}
           />
           <Table
             key={currentTable}

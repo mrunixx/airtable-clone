@@ -10,6 +10,9 @@ type Props = {
   setTableRecords: Dispatch<SetStateAction<RecordValue[]>>;
   filterOn: boolean;
   setFilterOn: Dispatch<SetStateAction<boolean>>;
+  selectedView: string;
+  sort: string;
+  sortFieldId: string;
 };
 
 export default function FilterPopup({
@@ -17,6 +20,9 @@ export default function FilterPopup({
   setTableRecords,
   filterOn,
   setFilterOn,
+  selectedView,
+  sort,
+  sortFieldId,
 }: Props) {
   const { data: fields } = api.table.getTableHeaders.useQuery(
     { tableId: tableId },
@@ -30,15 +36,19 @@ export default function FilterPopup({
   const [shouldFetch, setShouldFetch] = useState(false);
   const [offset, setOffset] = useState(0);
 
+  const viewMutation = api.table.updateTableView.useMutation();
+
   const {
     data: records,
     isLoading,
     isFetching,
   } = api.table.getFilteredRecordValues.useQuery(
     {
-      value: input,
-      field: field?.id ?? "",
-      operator: operator,
+      filterValue: input,
+      filterFieldId: field?.id ?? "",
+      filterOperator: operator,
+      sortOp: sort,
+      sortFieldId: sortFieldId,
       tableId: tableId,
       offset: offset,
       limit: 400,
@@ -48,23 +58,53 @@ export default function FilterPopup({
     },
   );
 
-  const { data: originalRecords } = api.table.getTableRecordValues.useQuery({
-    tableId: tableId,
-    offset: 0,
-    limit: 400,
-  }, {
-    refetchOnWindowFocus: false
-  });
+  const { data: originalRecords } = api.table.getTableRecordValues.useQuery(
+    {
+      tableId: tableId,
+      offset: 0,
+      limit: 400,
+    },
+    {
+      refetchOnWindowFocus: false,
+    },
+  );
+
+  const { data: view, isLoading: isViewLoading, isFetching: isViewFetching } = api.table.getTableView.useQuery(
+    { viewId: selectedView },
+    { refetchOnWindowFocus: false },
+  );
 
   const handleOnClick = () => {
     if (shouldFetch) {
       return;
     }
+    void updateTableView();
     setShouldFetch(true);
     setFilterOn(true);
     setTableRecords([]);
     setOffset(0);
   };
+
+  const updateTableView = async () => {
+    await viewMutation.mutateAsync({
+      viewId: selectedView,
+      filterFieldId: field?.id ?? "",
+      filterOp: operator,
+      filterValue: input,
+      sortOp: sort,
+      sortFieldId: sortFieldId,
+    });
+  };
+
+  useEffect(() => {
+    setShouldFetch(true);
+  }, [selectedView]);
+
+  useEffect(() => {
+    if (sortFieldId !== "") {
+      void updateTableView();
+    }
+  }, [sortFieldId]);
 
   useEffect(() => {
     if (!isLoading && !isFetching && records) {
@@ -74,6 +114,19 @@ export default function FilterPopup({
       }
     }
   }, [isLoading, isFetching, records]);
+
+  useEffect(() => {
+    if (!isViewLoading && !isViewFetching && view) {
+      if (view.filterFieldId !== "") {
+        setInput(view.filterValue)
+        setFilterOn(true);
+        setShouldFetch(true);
+      } else {
+        setFilterOn(false);
+        setShouldFetch(false);
+      }
+    }
+  }, [isViewLoading, isViewFetching, view])
 
   const handleResetFilter = () => {
     setShouldFetch(false);
@@ -94,6 +147,12 @@ export default function FilterPopup({
     const newOffset = offset + 400;
     setOffset(newOffset);
   };
+
+  useEffect(() => {
+    // check if filter exists
+    // load filter onto popup
+    // make filter button green
+  }, [selectedView]);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -131,7 +190,7 @@ export default function FilterPopup({
     >
       <PopoverTrigger>
         <div
-          className="grid-view-options mr-2 flex h-[26px] items-center justify-center rounded-sm px-2 py-1 hover:bg-[#f1f1f2]"
+          className={`grid-view-options mr-2 flex h-[26px] items-center justify-center rounded-sm px-2 py-1 hover:bg-[#f1f1f2] ${filterOn ? "bg-[#cef6d0]" : ""}`}
           role="button"
         >
           <svg

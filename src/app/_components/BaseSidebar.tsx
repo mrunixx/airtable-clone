@@ -14,6 +14,8 @@ type Props = {
   tableId: string;
   tableRecords: RecordValue[];
   setTableRecords: Dispatch<SetStateAction<RecordValue[]>>;
+  selectedView: string;
+  setSelectedView: Dispatch<SetStateAction<string>>
 };
 
 const BaseSidebar = ({
@@ -21,6 +23,8 @@ const BaseSidebar = ({
   tableInstanceRef,
   tableRecords,
   setTableRecords,
+  selectedView, 
+  setSelectedView
 }: Props) => {
   const [refetchView, setRefetchView] = useState(0)
   const { data: table, isLoading, refetch } = api.table.getTable.useQuery({
@@ -33,8 +37,6 @@ const BaseSidebar = ({
   }, {
     refetchOnWindowFocus: false
   });
-
-  const [selectedView, setSelectedView] = useState("");
 
   const handleReset = () => {
     setSelectedView("");
@@ -91,9 +93,6 @@ const BaseSidebar = ({
               view={view}
               selectedView={selectedView}
               setSelectedView={setSelectedView}
-              tableInstanceRef={tableInstanceRef}
-              tableRecords={tableRecords}
-              setTableRecords={setTableRecords}
             />
           );
         })}

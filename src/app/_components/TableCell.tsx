@@ -1,4 +1,4 @@
-import { Dispatch, SetStateAction, useEffect, useState } from "react";
+import { Dispatch, RefObject, SetStateAction, useEffect, useRef, useState } from "react";
 import { api } from "~/trpc/react";
 
 type Props = {
@@ -30,6 +30,8 @@ const TableCell = ({
   const [input, setInput] = useState(data ?? "");
   const [initialInput, setInitialInput] = useState(data ?? "");
   const [isEditable, setIsEditable] = useState(false);
+
+  const inputRef : RefObject<HTMLInputElement> = useRef(null);
 
   const cellMutation = api.table.updateCellValue.useMutation();
 
@@ -75,6 +77,15 @@ const TableCell = ({
   const handleEnter = (e: React.KeyboardEvent) => {
     if (e.key !== "Tab") {
       setIsEditable(true);
+    } else {
+      const form = inputRef.current?.form;
+      const nextElement = form
+        ?.querySelector<HTMLInputElement>(
+          `input[tabindex="${Number(inputRef.current?.tabIndex) + 1}"]`
+        );
+
+      console.log(nextElement);
+      nextElement?.focus();
     }
   };
 
@@ -97,6 +108,7 @@ const TableCell = ({
         onBlur={handleDbSave}
         className="h-[31px] w-full cursor-default bg-transparent p-1.5 focus:bg-white"
         readOnly={!isEditable}
+        ref={inputRef}
       />
     </div>
   );

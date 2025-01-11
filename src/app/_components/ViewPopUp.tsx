@@ -10,7 +10,7 @@ type Props = {
   title: string;
   children?: React.ReactNode;
   tableId: string;
-  setRefetchView?: Dispatch<SetStateAction<number>>
+  setRefetchView?: Dispatch<SetStateAction<number>>;
 };
 
 const ViewPopUp = ({ title, children, tableId, setRefetchView }: Props) => {
@@ -22,34 +22,22 @@ const ViewPopUp = ({ title, children, tableId, setRefetchView }: Props) => {
 
   const [viewTitle, setViewTitle] = useState("Grid View");
   const [isOpen, setIsOpen] = useState(false);
-  const [filterField, setFilterField] = useState(fields?.[0]);
-  const [filterOperator, setFilterOperator] = useState("contains");
-  const [input, setInput] = useState("");
-  const [index, setIndex] = useState(0);
-  const [sort, setSort] = useState("A → Z");
 
   const handleOpenChange = (change: boolean) => {
     setIsOpen(change);
   };
 
-  const handleResetFilter = () => {
-    setInput("");
-  };
-
   const handleSetPreset = async () => {
-    await viewMutation.mutateAsync({
-      title: viewTitle,
-      tableId: tableId,
-      filterFieldId: filterField?.id ?? " ",
-      filterOperator: filterOperator,
-      filterValue: input,
-      sortFieldId: fields?.[index]?.id ?? " ",
-      sortOperator: sort,
-    }).then(() => {
-      if (setRefetchView) {
-        setRefetchView((prev) => prev + 1);
-      }
-    });
+    await viewMutation
+      .mutateAsync({
+        title: viewTitle,
+        tableId: tableId,
+      })
+      .then(() => {
+        if (setRefetchView) {
+          setRefetchView((prev) => prev + 1);
+        }
+      });
     setIsOpen(false);
   };
 
@@ -81,96 +69,80 @@ const ViewPopUp = ({ title, children, tableId, setRefetchView }: Props) => {
           </svg>
         </div>
       </PopoverTrigger>
-      <PopoverContent className="flex flex-col items-start justify-start rounded-md p-4 text-sm shadow-elevation-high">
-        <div className="flex flex-col gap-2">
+      <PopoverContent className="flex w-[400px] flex-col items-start justify-start rounded-md p-5 text-sm shadow-elevation-high">
+        <div className="flex w-full flex-col gap-2">
           <input
             type="text"
-            className="h-8 w-full rounded-md border-gray-400 bg-[#f2f4f8] px-2 outline-none focus:border-2"
+            className="mb-6 h-8 w-full rounded-md border-gray-400 bg-[#f2f4f8] px-2 text-lg outline-none focus:border-2"
             placeholder="Grid View"
             value={viewTitle}
             onChange={(e) => setViewTitle(e.target.value)}
           />
-          <p className="">Filter</p>
-          <div className="">
-            <div className="h-15 flex items-center px-2 py-3 text-sm font-light">
-              <p className="w-[72px] px-2">Where</p>
-              <FilterFieldDropdown
-                selected={filterField}
-                setSelected={setFilterField}
-                tableId={tableId}
-              />
-              <FilterContainsDropdown
-                selected={filterOperator}
-                setSelected={setFilterOperator}
-              />
-              <div className="flex h-7 w-[124px] cursor-pointer items-center rounded-sm border-b border-r border-t px-2 text-sm outline-none">
-                <input
-                  type="text"
-                  className="m-0 h-full w-full outline-none"
-                  placeholder="Enter a value"
-                  value={input}
-                  onChange={(e) => setInput(e.target.value)}
-                />
-              </div>
-              <div
-                className="flex h-7 w-8 cursor-pointer items-center justify-center border-b border-r border-t text-sm outline-none hover:bg-gray-200"
-                onClick={handleResetFilter}
-              >
-                <svg
-                  width="16"
-                  height="16"
-                  viewBox="0 0 16 16"
-                  className="icon flex-none"
-                >
-                  <use
-                    fill="currentColor"
-                    href="/icons/icon_definitions.svg?v=68b23d569e0a0c2f5529fd9b824929e7#Trash"
-                  ></use>
-                </svg>
-              </div>
-              <div className="flex h-7 w-8 cursor-pointer items-center justify-center border-b border-r border-t text-sm outline-none hover:bg-gray-200">
-                <svg
-                  width="16"
-                  height="16"
-                  viewBox="0 0 16 16"
-                  className="icon flex-none"
-                >
-                  <use
-                    fill="currentColor"
-                    href="/icons/icon_definitions.svg?v=68b23d569e0a0c2f5529fd9b824929e7#DotsSixVertical"
-                  ></use>
-                </svg>
-              </div>
-            </div>
-          </div>
-          <p>Sort</p>
-          <div className="mb-3 flex items-center gap-3">
-            <SortFieldDropdown
-              selected={index}
-              setSelected={setIndex}
-              tableId={tableId}
-            />
-            <SortTypeDropdown sort={sort} setSort={setSort} />
-            <div className="cursorp-pointer flex h-7 w-7 items-center justify-center rounded-sm hover:bg-gray-200">
+          <p className="text-[16px] font-light">Who can edit</p>
+          <fieldset className="flex justify-between">
+            <div className="flex items-center gap-1 font-light">
+              <input type="radio" name="collab" id="locked" />
               <svg
                 width="16"
                 height="16"
                 viewBox="0 0 16 16"
-                className="icon flex-none"
+                className="mx-half flex-none"
               >
                 <use
                   fill="currentColor"
-                  href="/icons/icon_definitions.svg?v=68b23d569e0a0c2f5529fd9b824929e7#X"
+                  href="/icons/icon_definitions.svg?v=68b23d569e0a0c2f5529fd9b824929e7#UsersThree"
                 ></use>
               </svg>
+              Collaborative
             </div>
+            <div className="flex items-center gap-1 font-light">
+              <input type="radio" name="personal" id="locked" />
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 16 16"
+                className="mx-half flex-none"
+              >
+                <use
+                  fill="currentColor"
+                  href="/icons/icon_definitions.svg?v=68b23d569e0a0c2f5529fd9b824929e7#User"
+                ></use>
+              </svg>
+              Personal
+            </div>
+            <div className="flex items-center gap-1 font-light">
+              <input type="radio" name="locked" id="locked" />
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 16 16"
+                className="mx-half flex-none"
+              >
+                <use
+                  fill="currentColor"
+                  href="/icons/icon_definitions.svg?v=68b23d569e0a0c2f5529fd9b824929e7#Lock"
+                ></use>
+              </svg>
+              Locked
+            </div>
+          </fieldset>
+          <p className="opacity-70">
+            All collaborators can edit the configuration
+          </p>
+          <div className="flex justify-end gap-1">
+            <button
+              className="h-9 rounded-md px-2 text-[13px] text-black"
+              onClick={() => setIsOpen(false)}
+            >
+              Cancel
+            </button>
+            <button
+              className="h-9 rounded-md bg-[#0d70df] px-2 text-[13px] text-white shadow-elevation-low hover:bg-blue-600"
+              onClick={handleSetPreset}
+            >
+              Create new view
+            </button>
           </div>
-          <button
-            className="ml-auto h-7 rounded-md bg-[#0d70df] px-2 text-[13px] text-white shadow-elevation-low hover:bg-blue-600"
-            onClick={handleSetPreset}
-          >
-            Add Preset
-          </button>
         </div>
       </PopoverContent>
     </Popover>

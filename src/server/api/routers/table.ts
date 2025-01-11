@@ -7,7 +7,6 @@ import {
   protectedProcedure,
   publicProcedure,
 } from "~/server/api/trpc";
-import { api } from "~/trpc/server";
 
 export const tableRouter = createTRPCRouter({
   create: protectedProcedure
@@ -34,15 +33,15 @@ export const tableRouter = createTRPCRouter({
     .query(async ({ ctx, input }) => {
       return ctx.db.table.findUnique({
         where: {
-          id: input.tableId 
+          id: input.tableId,
         },
         include: {
-          views: true
-        }
+          views: true,
+        },
       });
     }),
   getTableHeaders: protectedProcedure
-    .input(z.object({ tableId: z.string().min(1) }))
+    .input(z.object({ tableId: z.string().min(0) }))
     .query(async ({ ctx, input }) => {
       return ctx.db.field.findMany({
         where: {
@@ -239,7 +238,7 @@ export const tableRouter = createTRPCRouter({
         },
       });
 
-      return updatedRecordValue; // Return the updated record value
+      return updatedRecordValue;
     }),
   create15000Records: protectedProcedure
     .input(
@@ -287,35 +286,38 @@ export const tableRouter = createTRPCRouter({
     .input(
       z.object({
         tableId: z.string().min(1),
-        operator: z.string().min(1),
-        field: z.string().min(1),
-        value: z.string(),
+        filterOperator: z.string(),
+        filterFieldId: z.string(),
+        filterValue: z.string(),
+        sortFieldId: z.string(),
+        sortOp: z.string(),
         offset: z.number(),
         limit: z.number(),
       }),
     )
     .query(async ({ ctx, input }) => {
       let dataFilter;
-      const numVal = parseInt(input.value);
-      switch (input.operator) {
+
+      const numVal = parseInt(input.filterValue);
+      switch (input.filterOperator) {
         case "contains":
           dataFilter = {
-            contains: input.value,
+            contains: input.filterValue,
           };
           break;
         case "does not contain":
           dataFilter = {
             not: {
-              contains: input.value,
+              contains: input.filterValue,
             },
           };
           break;
         case "is":
-          dataFilter = input.value;
+          dataFilter = input.filterValue;
           break;
         case "is not":
           dataFilter = {
-            not: input.value,
+            not: input.filterValue,
           };
           break;
         case "is empty":
@@ -327,6 +329,7 @@ export const tableRouter = createTRPCRouter({
           };
           break;
         default:
+          dataFilter = {};
           break;
       }
 
@@ -336,7 +339,7 @@ export const tableRouter = createTRPCRouter({
           cellValues: {
             some: {
               field: {
-                id: input.field,
+                id: input.filterFieldId,
               },
               data: dataFilter,
             },
@@ -352,15 +355,42 @@ export const tableRouter = createTRPCRouter({
         take: input.limit,
       });
 
+      switch (input.sortOp) {
+        case "A → Z":
+          val.sort((a, b) => {
+            const aVal =
+              a.cellValues.find((c) => c.fieldId === input.sortFieldId)?.data ??
+              "";
+            const bVal =
+              b.cellValues.find((c) => c.fieldId === input.sortFieldId)?.data ??
+              "";
+            return aVal.localeCompare(bVal);
+          });
+          break;
+        case "Z → A":
+          val.sort((a, b) => {
+            const aVal =
+              a.cellValues.find((c) => c.fieldId === input.sortFieldId)?.data ??
+              "";
+            const bVal =
+              b.cellValues.find((c) => c.fieldId === input.sortFieldId)?.data ??
+              "";
+            return bVal.localeCompare(aVal);
+          });
+          break;
+        default:
+          break;
+      }
+
       const recordValues = val.flatMap((record) => record.cellValues);
 
       if (
-        ["greater than", "less than"].includes(input.operator) &&
+        ["greater than", "less than"].includes(input.filterOperator) &&
         !isNaN(numVal)
       ) {
         return recordValues.filter((r) => {
           const dataNum = parseInt(r.data);
-          return input.operator === "greater than"
+          return input.filterOperator === "greater than"
             ? dataNum > numVal
             : dataNum < numVal;
         });
@@ -373,11 +403,6 @@ export const tableRouter = createTRPCRouter({
       z.object({
         title: z.string().min(1),
         tableId: z.string().min(1),
-        filterOperator: z.string().min(1),
-        filterFieldId: z.string().min(1),
-        filterValue: z.string().min(0),
-        sortOperator: z.string().min(1),
-        sortFieldId: z.string().min(1),
       }),
     )
     .mutation(async ({ ctx, input }) => {
@@ -385,11 +410,45 @@ export const tableRouter = createTRPCRouter({
         data: {
           title: input.title,
           tableId: input.tableId,
-          filterOp: input.filterOperator,
+          filterOp: "",
+          filterFieldId: "",
+          filterValue: "",
+          sortOp: "",
+          sortFieldId: "",
+        },
+      });
+    }),
+  updateTableView: protectedProcedure
+    .input(
+      z.object({
+        viewId: z.string(),
+        filterFieldId: z.string(),
+        filterOp: z.string(),
+        filterValue: z.string(),
+        sortOp: z.string(),
+        sortFieldId: z.string(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      return await ctx.db.view.update({
+        where: {
+          id: input.viewId,
+        },
+        data: {
           filterFieldId: input.filterFieldId,
+          filterOp: input.filterOp,
           filterValue: input.filterValue,
-          sortOp: input.sortOperator,
+          sortOp: input.sortOp,
           sortFieldId: input.sortFieldId,
+        },
+      });
+    }),
+  getTableView: protectedProcedure
+    .input(z.object({ viewId: z.string().min(0) }))
+    .query(async ({ ctx, input }) => {
+      return ctx.db.view.findUnique({
+        where: {
+          id: input.viewId
         },
       });
     }),

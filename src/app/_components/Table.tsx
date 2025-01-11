@@ -175,17 +175,7 @@ const TanstackTable = ({ tableId, tableInstanceRef, tableRecords, setTableRecord
     const newOffset = offset + 400;
     setOffset(newOffset);
   };
-
-  const handleFrontendSort = (
-    header: Header<Record<string, string>, unknown>,
-  ) => {
-    header.column.toggleSorting();
-  };
-
-  // useEffect(() => {
-  //   console.log("Offset changed:", offset);
-  // }, [offset]);
-
+  
   useEffect(() => {
     const interval = setInterval(() => {
       const element = parentRef.current;
@@ -273,7 +263,6 @@ const TanstackTable = ({ tableId, tableInstanceRef, tableRecords, setTableRecord
                     <div
                       key={index}
                       className="m-0 p-0"
-                      onClick={() => handleFrontendSort(header)}
                     >
                       {flexRender(
                         header.column.columnDef.header,

@@ -7,49 +7,13 @@ type Props = {
   view: View
   selectedView: string;
   setSelectedView: Dispatch<SetStateAction<string>>
-  tableInstanceRef: MutableRefObject<Table<Record<string, string>>> | MutableRefObject<null>;
-  tableRecords: RecordValue[];
-  setTableRecords: Dispatch<SetStateAction<RecordValue[]>>  
 }
 
-const TableViewButton = ({ view, selectedView, setSelectedView, tableInstanceRef, tableRecords, setTableRecords }: Props) => {
-
-  const [offset, setOffset] = useState(0);
-
-  const {
-    data: records,
-    isLoading,
-    isFetching,
-  } = api.table.getFilteredRecordValues.useQuery(
-    {
-      value: view.filterValue,
-      field: view.filterFieldId,
-      operator: view.filterOp,
-      tableId: view.tableId,
-      offset: offset,
-      limit: 400,
-    },
-    {
-      enabled: selectedView === view.id
-    }
-  );
+const TableViewButton = ({ view, selectedView, setSelectedView }: Props) => {
 
   const handleClick = () => {
     setSelectedView(view.id);
-    setTableRecords(records ?? []);
-    if (view.sortOp === "A → Z") {
-      tableInstanceRef.current?.getAllColumns()[0]?.toggleSorting(false, false);
-    } else {
-      tableInstanceRef.current?.getAllColumns()[0]?.toggleSorting(true, false);
-    }
   }
-
-
-  useEffect(() => {
-    if (!isLoading && !isFetching && records) {
-      setTableRecords((prev) => [...prev, ...records]);
-    }
-  }, [isLoading, isFetching, records]);
 
   return (
     <div

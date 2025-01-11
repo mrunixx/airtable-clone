@@ -5,6 +5,7 @@ import {
   Select,
   SelectItem,
 } from "@nextui-org/react";
+import { Field } from "@prisma/client";
 import { Table } from "@tanstack/react-table";
 import { Dispatch, MutableRefObject, SetStateAction, useState } from "react";
 import { api } from "~/trpc/react";
@@ -12,21 +13,15 @@ import { api } from "~/trpc/react";
 type Props = {
   selected: number;
   setSelected: Dispatch<SetStateAction<number>>
-  tableId: string;
+  fields: Field[]
 };
 
-const SortFieldDropdown = ({ selected, setSelected, tableId }: Props) => {
+const SortFieldDropdown = ({ selected, setSelected, fields }: Props) => {
   const [isOpen, setIsOpen] = useState(false);
 
   const handleOpenChange = (change: boolean) => {
     setIsOpen(change);
   };
-
-  const { data: fields, isLoading: isBaseLoading } =
-    api.table.getTableHeaders.useQuery(
-      { tableId: tableId },
-      { refetchOnWindowFocus: true},
-    );
 
   const handleClick = (index: number) => {
     setSelected(index);

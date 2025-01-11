@@ -3,28 +3,41 @@ import { Dispatch, MutableRefObject, SetStateAction, useState } from "react";
 import SortFieldDropdown from "./SortFieldDropdown";
 import { Table } from "@tanstack/react-table";
 import SortTypeDropdown from "./SortTypeDropdown";
-import { RecordValue } from "@prisma/client";
+import { api } from "~/trpc/react";
 
 type Props = {
   tableInstanceRef:
     | MutableRefObject<Table<Record<string, string>>>
     | MutableRefObject<null>;
   tableId: string;
-
+  sort: string;
+  setSort: Dispatch<SetStateAction<string>>;
+  selectedView: string;
+  sortFieldId: string;
+  setSortFieldId: Dispatch<SetStateAction<string>>;
 };
 
-export default function SortDialog({ tableInstanceRef, tableId }: Props) {
+export default function SortDialog({
+  tableInstanceRef,
+  tableId,
+  sort,
+  setSort,
+  selectedView,
+  sortFieldId,
+  setSortFieldId,
+}: Props) {
   const [isOpen, setIsOpen] = useState(false);
   const [index, setIndex] = useState(0);
-  const [sort, setSort] = useState("A → Z");
+
+  const { data: fields, isLoading: isBaseLoading } =
+    api.table.getTableHeaders.useQuery(
+      { tableId: tableId },
+      { refetchOnWindowFocus: true },
+    );
 
   const handleOnClick = () => {
     setIsOpen(false);
-    if (sort === "A → Z") {
-      tableInstanceRef.current?.getAllColumns()[index]?.toggleSorting(false, false);
-    } else {
-      tableInstanceRef.current?.getAllColumns()[index]?.toggleSorting(true, false);
-    }
+    setSortFieldId(fields?.[index]?.id ?? "");
   };
 
   const handleOpenChange = (change: boolean) => {
@@ -76,17 +89,14 @@ export default function SortDialog({ tableInstanceRef, tableId }: Props) {
             </svg>
           </div>
           <hr className="m-2" />
-          <div className="flex items-center gap-3 mb-3">
+          <div className="mb-3 flex items-center gap-3">
             <SortFieldDropdown
               selected={index}
               setSelected={setIndex}
-              tableId={tableId}
+              fields={fields ?? []}
             />
-            <SortTypeDropdown
-              sort={sort}
-              setSort={setSort}
-            />
-            <div className="cursorp-pointer flex h-7 w-7 items-center justify-center rounded-sm hover:bg-gray-200" >
+            <SortTypeDropdown sort={sort} setSort={setSort} />
+            <div className="cursorp-pointer flex h-7 w-7 items-center justify-center rounded-sm hover:bg-gray-200">
               <svg
                 width="16"
                 height="16"
