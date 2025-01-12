@@ -95,7 +95,7 @@ const TanstackTable = ({
       offset: offset,
       limit: 400,
     },
-    {enabled: viewDefined, refetchOnWindowFocus: false },
+    { enabled: viewDefined, refetchOnWindowFocus: false },
   );
 
   const [tableFields, setTableFields] = useState(fields);
@@ -360,10 +360,15 @@ const TanstackTable = ({
           );
         })}
         <div
-          className={`flex h-8 ${clickable ? "cursor-pointer" : "cursor-wait"} flex-col border-b border-r border-gray-300 bg-white text-left text-[13px] text-gray-500 hover:bg-gray-50`}
+          className={`flex h-8 ${clickable ? "cursor-pointer" : "cursor-wait"} border-b border-r border-gray-300 bg-white text-left text-[13px] text-gray-500 hover:bg-gray-50 pr-5 items-center`}
           onClick={handleAddRecord}
         >
           <NewRecordButton />
+          {(isRecordsFetching || isRecordsLoading) && (
+            <>
+              <div className="loader-records ml-auto flex items-center"></div>
+            </>
+          )}
         </div>
         <div
           className="flex h-8 cursor-pointer flex-col border-b border-r border-gray-300 bg-white text-left text-[13px] text-red-600 hover:bg-red-500 hover:text-white"

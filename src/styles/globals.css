@@ -18,3 +18,18 @@
 @keyframes l38 {
   100% {background-position: 100% 0,100% 100%,0 100%,0 0}
 }
+
+/* HTML: <div class="loader"></div> */
+/* HTML: <div class="loader"></div> */
+.loader-records {
+  width: 40px;
+  height: 10px;
+  background: 
+    linear-gradient(#99465a 0 0) left -40px top 0/40px 20px,
+    linear-gradient(#ddd 0 0) center/100% 50%; 
+  background-repeat: no-repeat;
+  animation: l5 1s infinite linear;
+}
+@keyframes l5 {
+  100% {background-position: right -40px top 0,center}
+}
