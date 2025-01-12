@@ -124,7 +124,7 @@ const BasePage = () => {
           sortOp={sortOp}
           setSortOp={setSortOp}
         />
-        <div className="flex h-full flex-grow overflow-hidden bg-[#f8f8f8]">
+        <div className="flex h-full flex-grow overflow-x-auto bg-[#f8f8f8]">
           <BaseSidebar
             tableInstanceRef={tableInstanceRef}
             tableId={currentTable ?? ""}

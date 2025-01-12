@@ -38,3 +38,7 @@
   flex: 0 1 calc(25% - 1rem); 
   max-width: calc(25% - 1rem);
 }
+
+html {
+  overflow-x: hidden;
+}

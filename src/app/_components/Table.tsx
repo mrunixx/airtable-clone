@@ -309,7 +309,7 @@ const TanstackTable = ({
     if (viewDefined) {
       void refetchRecords();
     }
-  }, [viewDefined])
+  }, [viewDefined]);
 
   if (isBaseLoading || !tableReady) {
     return <Loading />;
@@ -362,7 +362,7 @@ const TanstackTable = ({
           );
         })}
         <div
-          className={`flex h-8 ${clickable ? "cursor-pointer" : "cursor-wait"} border-b border-r border-gray-300 bg-white text-left text-[13px] text-gray-500 hover:bg-gray-50 pr-5 items-center`}
+          className={`flex h-8 ${clickable ? "cursor-pointer" : "cursor-wait"} items-center border-b border-r border-gray-300 bg-white pr-5 text-left text-[13px] text-gray-500 hover:bg-gray-50`}
           onClick={handleAddRecord}
         >
           <NewRecordButton />
@@ -378,20 +378,21 @@ const TanstackTable = ({
         >
           <NewRecordButton>ADD 15000 RECORDS</NewRecordButton>
         </div>
+      </div>
+      <div className="flex w-full flex-col justify-between">
+        <div className="flex h-8 w-full border-b border-gray-300 bg-white">
+          <NewFieldDialog handleClick={handleAddField} />
+        </div>
+      </div>
+      <div className="absolute bottom-0 h-8 w-full bg-white">
         <div className="flex h-full">
           <div className="flex h-full w-[242px] border-r border-gray-300 bg-white">
             <div className="mt-auto h-[34px] w-full border-t border-gray-300 px-2 pt-1 text-xs font-light">
               {tableInstance.getRowModel().rows.length} records
             </div>
           </div>
-          <div className="flex h-[34px] flex-grow self-end border-t border-gray-300 bg-white"></div>
+          <div className="flex h-8 flex-grow border-t border-gray-300 bg-white"></div>
         </div>
-      </div>
-      <div className="flex w-full flex-col justify-between">
-        <div className="flex h-8 w-full border-b border-gray-300 bg-white">
-          <NewFieldDialog handleClick={handleAddField} />
-        </div>
-        <div className="flex h-[34px] border-t border-gray-300 bg-white absolute bottom-0"></div>
       </div>
     </div>
   );
