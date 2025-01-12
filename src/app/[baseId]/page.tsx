@@ -86,7 +86,7 @@ const BasePage = () => {
   useEffect(() => {
     setFilterOn(false);
     setViewDefined(false);
-    refetchView();
+    refetchView().catch(() => console.log("view capture failed"));
   }, [selectedView])
 
   if (isBaseLoading || isTablesLoading || !base) {

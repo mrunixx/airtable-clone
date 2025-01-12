@@ -248,12 +248,6 @@ const TanstackTable = ({
   };
 
   useEffect(() => {
-    if (viewDefined) {
-      refetchRecords()
-    }
-  }, [viewDefined])
-
-  useEffect(() => {
     const interval = setInterval(() => {
       const element = parentRef.current;
       if (element) {
@@ -303,9 +297,6 @@ const TanstackTable = ({
       setTableReady(true);
     }
   }, [isBaseLoading, isRecordsLoading]);
-
-  useEffect(() => {
-  }, [tableRecords]);
 
   useEffect(() => {
     setTableReady(false);
