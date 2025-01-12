@@ -45,6 +45,7 @@ type Props = {
   setSortOp: Dispatch<SetStateAction<string>>;
   sortFieldId: string;
   setSortFieldId: Dispatch<SetStateAction<string>>;
+  viewDefined: boolean;
 };
 
 const TanstackTable = ({
@@ -64,9 +65,10 @@ const TanstackTable = ({
   setFilterVal,
   setSortOp,
   setSortFieldId,
+  viewDefined,
 }: Props) => {
   const parentRef = useRef<HTMLDivElement>(null);
-  const[offset, setOffset] = useState(0);
+  const [offset, setOffset] = useState(0);
 
   const createTableRecordMutation = api.table.createTableRecord.useMutation();
   const createTableFieldMutation = api.table.createTableField.useMutation();
@@ -91,7 +93,7 @@ const TanstackTable = ({
       sortFieldId: sortFieldId,
       sortOp: sortOp,
       offset: offset,
-      limit: 400
+      limit: 400,
     },
     { refetchOnWindowFocus: false },
   );
@@ -156,8 +158,16 @@ const TanstackTable = ({
   };
 
   useEffect(() => {
-    console.log("updated table view with: ", {filterFieldId, filterVal, filterOp, sortFieldId, sortOp})
-    void updateTableView();
+    if (viewDefined) {
+      console.log("updated table view with: ", {
+        filterFieldId,
+        filterVal,
+        filterOp,
+        sortFieldId,
+        sortOp,
+      });
+      void updateTableView();
+    }
   }, [filterFieldId, filterVal, filterOp, sortFieldId, sortOp]);
 
   useEffect(() => {
@@ -279,7 +289,7 @@ const TanstackTable = ({
 
   useEffect(() => {
     if (!isRecordsLoading && !isRecordsFetching && records) {
-        setTableRecords((prev) => [...prev, ...records]);
+      setTableRecords((prev) => [...prev, ...records]);
     }
   }, [isRecordsLoading, isRecordsFetching, records]);
 

@@ -53,6 +53,7 @@ const BasePage = () => {
   const [filterVal, setFilterVal] = useState("");
   const [sortFieldId, setSortFieldId] = useState("");
   const [sortOp, setSortOp] = useState("");
+  const [viewDefined, setViewDefined] = useState(false);
   
   useEffect(() => {
     if (!isViewFetching && !isViewLoading && view) {
@@ -64,6 +65,7 @@ const BasePage = () => {
       setFilterOp(view.filterOp);
       setSortFieldId(view.sortFieldId);
       setSortOp(view.sortOp);
+      setViewDefined(true);
     }
   }, [isViewFetching, isViewLoading, view]);
 
@@ -82,6 +84,7 @@ const BasePage = () => {
 
   useEffect(() => {
     setFilterOn(false);
+    setViewDefined(false);
   }, [selectedView])
 
   if (isBaseLoading || isTablesLoading || !base) {
@@ -147,6 +150,7 @@ const BasePage = () => {
             setSortFieldId={setSortFieldId}
             sortOp={sortOp}
             setSortOp={setSortOp}
+            viewDefined={viewDefined}
           />
         </div>
       </div>
