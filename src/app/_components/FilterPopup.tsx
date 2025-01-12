@@ -63,7 +63,7 @@ export default function FilterPopup({
     },
   );
 
-  const { data: originalRecords } = api.table.getTableRecordValues.useQuery(
+  const { data: originalRecords, refetch: refetchOriginalRecords } = api.table.getTableRecordValues.useQuery(
     {
       tableId: tableId,
       offset: 0,
@@ -79,14 +79,18 @@ export default function FilterPopup({
     { refetchOnWindowFocus: false },
   );
 
-  const handleOnClick = () => {
+  const handleOpenChange = (change: boolean) => {
+    setIsOpen(change);
+  };
+
+  const handleOnClick = async () => {
     if (shouldFetch) {
       return;
     }
     setShouldFetch(true);
-    setFilterOn(true);
-    setTableRecords([]);
+    setFilterOn(true); 
     setOffset(0);
+    await updateTableView();
   };
 
   const updateTableView = async () => {
@@ -97,17 +101,17 @@ export default function FilterPopup({
       filterValue: input,
       sortOp: sort,
       sortFieldId: sortFieldId,
+    }).then(async () => {
+      setTableRecords([]);
+      setOffset(0);
+      await refetch();
     });
   };
 
-  const handleResetFilter = () => {
+  const handleResetFilter = async () => {
     setShouldFetch(false);
     setFilterOn(false);
-    setTableRecords(originalRecords ?? []);
-  };
-
-  const handleOpenChange = (change: boolean) => {
-    setIsOpen(change);
+    await refetchOriginalRecords();
   };
 
   const loadMoreData = () => {
@@ -117,11 +121,10 @@ export default function FilterPopup({
   };
 
   useEffect(() => {
-    if (sortFieldId !== "" && sort !== "") {
-      void updateTableView();
+    if (originalRecords) {
+      setTableRecords(originalRecords);
     }
-    setShouldFetch(true);
-  }, [sortFieldId, sort]);
+  }, [originalRecords])
 
   useEffect(() => {
     if (!isLoading && !isFetching && records) {
@@ -133,44 +136,47 @@ export default function FilterPopup({
   }, [isLoading, isFetching, records]);
 
   useEffect(() => {
-    if (!isViewLoading && !isViewFetching && view) {
+    if (!isViewFetching && !isViewLoading && view) {
       if (view.filterFieldId !== "") {
         setInput(view.filterValue);
-        setOperator(view.filterOp);
         setField(() => {
           return fields?.find((f) => f.id === view.filterFieldId);
         })
-        setSort(view.sortOp);
-        setSortFieldId(view.sortFieldId);
+        setOperator(view.filterOp);
         setFilterOn(true);
         setShouldFetch(true);
-        void refetch();
       } else {
         setFilterOn(false);
-        setShouldFetch(false);
-        setTableRecords(originalRecords ?? []);
+      }
+
+      if (view.sortFieldId !== "") {
+        setSortFieldId(view.sortFieldId);
+        setSort(view.sortOp);
       }
     }
-  }, [isViewLoading, isViewFetching, view])
+  }, [isViewFetching, isViewLoading, view])
 
   useEffect(() => {
-    setField(fields?.[0]);
-  }, [fields?.[0]]);
+    if (sortFieldId !== "" && sort !== "") {
+      void updateTableView();
+    }
+    setShouldFetch(true);
+    setTableRecords([]);
+  }, [sortFieldId, sort]);
+
+  // useEffect(() => {
+  //   setField(fields?.[0]);
+  // }, [fields?.[0]]);
 
   useEffect(() => {
     if (selectedView !== "") {
-      setShouldFetch(true);
+      setShouldFetch(false);
       setTableRecords([]);
       setOffset(0);
     } else {
-      setShouldFetch(false);
       setFilterOn(false);
     }
   }, [selectedView]);
-
-  useEffect(() => {
-    setTableRecords([]);
-  }, [sort])
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -198,10 +204,6 @@ export default function FilterPopup({
 
     return () => clearInterval(interval);
   }, [loadMoreData]);
-
-  useEffect(() => {
-    setTableRecords(originalRecords ?? [])
-  }, [])
 
   useEffect(() => {
     console.log({
