@@ -31,6 +31,7 @@ const BasePage = () => {
     data: view,
     isLoading: isViewLoading,
     isFetching: isViewFetching,
+    refetch: refetchView,
   } = api.table.getTableView.useQuery(
     { viewId: selectedView },
     { refetchOnWindowFocus: false },
@@ -57,6 +58,7 @@ const BasePage = () => {
   
   useEffect(() => {
     if (!isViewFetching && !isViewLoading && view) {
+      setViewDefined(true);
       if (view.filterFieldId !== "") {
         setFilterOn(true);
       }
@@ -65,7 +67,6 @@ const BasePage = () => {
       setFilterOp(view.filterOp);
       setSortFieldId(view.sortFieldId);
       setSortOp(view.sortOp);
-      setViewDefined(true);
     }
   }, [isViewFetching, isViewLoading, view]);
 
@@ -85,6 +86,7 @@ const BasePage = () => {
   useEffect(() => {
     setFilterOn(false);
     setViewDefined(false);
+    refetchView();
   }, [selectedView])
 
   if (isBaseLoading || isTablesLoading || !base) {

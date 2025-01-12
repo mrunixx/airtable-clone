@@ -159,13 +159,6 @@ const TanstackTable = ({
 
   useEffect(() => {
     if (viewDefined) {
-      console.log("updated table view with: ", {
-        filterFieldId,
-        filterVal,
-        filterOp,
-        sortFieldId,
-        sortOp,
-      });
       void updateTableView();
     }
   }, [filterFieldId, filterVal, filterOp, sortFieldId, sortOp]);
@@ -255,6 +248,12 @@ const TanstackTable = ({
   };
 
   useEffect(() => {
+    if (viewDefined) {
+      refetchRecords()
+    }
+  }, [viewDefined])
+
+  useEffect(() => {
     const interval = setInterval(() => {
       const element = parentRef.current;
       if (element) {
@@ -306,7 +305,6 @@ const TanstackTable = ({
   }, [isBaseLoading, isRecordsLoading]);
 
   useEffect(() => {
-    console.log(tableRecords);
   }, [tableRecords]);
 
   useEffect(() => {
