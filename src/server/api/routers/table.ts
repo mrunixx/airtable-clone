@@ -376,7 +376,7 @@ export const tableRouter = createTRPCRouter({
             skip: input.offset,
             take: input.limit
           }).then((r) => {
-            r.flatMap((record) => record.cellValues)
+            return r.flatMap((record) => record.cellValues)
           }); 
         }
           val = await ctx.db.record.findMany({
