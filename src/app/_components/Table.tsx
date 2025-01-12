@@ -95,7 +95,7 @@ const TanstackTable = ({
       offset: offset,
       limit: 400,
     },
-    { refetchOnWindowFocus: false },
+    {enabled: viewDefined, refetchOnWindowFocus: false },
   );
 
   const [tableFields, setTableFields] = useState(fields);
