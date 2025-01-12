@@ -45,7 +45,7 @@ export default function FilterPopup({
   useEffect(() => {
     setField(() => {
       const prevField = fields?.find((f) => f.id === filterFieldId) 
-      return prevField !== undefined ? prevField : fields?.[0];
+      return prevField ?? fields?.[0];
     })
   }, [fields])
 
