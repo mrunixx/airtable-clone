@@ -1,5 +1,6 @@
 import { Popover, PopoverContent, PopoverTrigger } from "@nextui-org/react";
-import { Dispatch, SetStateAction, useEffect, useState } from "react";
+import { Dispatch, SetStateAction, use, useEffect, useState } from "react";
+import { api } from "~/trpc/react";
 
 type Props = {
   value: string,
@@ -9,10 +10,14 @@ type Props = {
 const SearchPopup = ({ value, setValue } : Props) => {
   const [input, setInput] = useState("") 
   const [isOpen, setIsOpen] = useState(false);
+  const {data: record, isFetching, isLoading} = api.table.getSearchRecord.useQuery({searchValue: value});
   const handleOpenChange = (change: boolean) => {
     setIsOpen(change);
   };
 
+  useEffect(() => {
+    console.log(record)
+  }, [record])
 
   useEffect(() => {
     const delayDebounceFn = setTimeout(() => {

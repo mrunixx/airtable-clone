@@ -315,10 +315,6 @@ const TanstackTable = ({
     return <Loading />;
   }
 
-  if (offset === 0 && (isRecordsLoading || isRecordsFetching)) {
-    return <Loading />;
-  }
-
   return (
     <div
       className="flex w-full overflow-y-scroll border-l border-t border-gray-300"
@@ -395,7 +391,7 @@ const TanstackTable = ({
         <div className="flex h-8 w-full border-b border-gray-300 bg-white">
           <NewFieldDialog handleClick={handleAddField} />
         </div>
-        <div className="h-[34px] border-t border-gray-300 bg-white"></div>
+        <div className="flex h-[34px] border-t border-gray-300 bg-white absolute bottom-0"></div>
       </div>
     </div>
   );

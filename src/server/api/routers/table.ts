@@ -533,4 +533,20 @@ export const tableRouter = createTRPCRouter({
         },
       });
     }),
+  getSearchRecord: protectedProcedure
+    .input(z.object({ searchValue: z.string().min(1) }))
+    .query(async ({ ctx, input }) => {
+      return ctx.db.record.findFirst({
+        where: {
+          cellValues: {
+            some: {
+              data: input.searchValue
+            }
+          }
+        },
+        orderBy: {
+          rowIndex: "asc"
+        }
+      });
+    }),
 });
