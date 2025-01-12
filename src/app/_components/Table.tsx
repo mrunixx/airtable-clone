@@ -305,6 +305,12 @@ const TanstackTable = ({
     void refetchRecords();
   }, [tableId]);
 
+  useEffect(() => {
+    if (viewDefined) {
+      void refetchRecords();
+    }
+  }, [viewDefined])
+
   if (isBaseLoading || !tableReady) {
     return <Loading />;
   }
