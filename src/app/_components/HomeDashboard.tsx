@@ -131,7 +131,7 @@ const HomeDashboard = () => {
           </div>
         </div>
       </div>
-      <div className="flex flex-col gap-2">
+      <div className="flex flex-col gap-2 w-full">
         <p className="opacity-70 text-sm">Today</p>
         <div className="flex flex-wrap gap-4">
           <DisplayBaseCards />

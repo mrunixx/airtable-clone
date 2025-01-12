@@ -13,7 +13,7 @@ const BaseCard = ({ name, baseId }: Props) => {
   return (
     <div
       role="button"
-      className="flex h-[95px] min-w-[250px] flex-1 rounded-lg bg-white shadow-elevation-low hover:shadow-elevation-medium items-center"
+      className="flex h-[95px] min-w-[250px] max-w-[400px] flex-1 rounded-lg bg-white shadow-elevation-low hover:shadow-elevation-medium items-center card"
       onClick={handleClick}
     >
       <BaseLogo>{name.slice(0, 2)}</BaseLogo>

@@ -33,3 +33,8 @@
 @keyframes l5 {
   100% {background-position: right -40px top 0,center}
 }
+
+.card {
+  flex: 0 1 calc(25% - 1rem); 
+  max-width: calc(25% - 1rem);
+}
