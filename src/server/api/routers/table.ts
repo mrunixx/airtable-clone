@@ -188,6 +188,16 @@ export const tableRouter = createTRPCRouter({
               { name: "Status" },
             ],
           },
+          views: {
+            create: {
+              title: "Grid View 1",
+              filterOp: "",
+              filterFieldId: "",
+              filterValue: "",
+              sortOp: "",
+              sortFieldId: ""
+            }
+          }
         },
         include: {
           records: true,
