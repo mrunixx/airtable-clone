@@ -350,26 +350,54 @@ export const tableRouter = createTRPCRouter({
             dataFilter = {};
             break;
         }
-
-        val = await ctx.db.record.findMany({
-          where: {
-            tableId: input.tableId,
-            cellValues: {
-              some: {
-                fieldId: input.filterFieldId,
-                data: dataFilter,
+        if (
+          input.sortFieldId === "" &&
+          input.filterOperator !== "greater than" &&
+          input.filterOperator !== "less than"
+        ) {
+          return await ctx.db.record.findMany({
+            where: {
+              tableId: input.tableId,
+              cellValues: {
+                some: {
+                  fieldId: input.filterFieldId,
+                  data: dataFilter,
+                },
               },
             },
-          },
-          include: {
-            cellValues: true,
-          },
-          orderBy: [
-            {
-              rowIndex: "asc",
+            include: {
+              cellValues: true,
             },
-          ],
-        });
+            orderBy: [
+              {
+                rowIndex: "asc",
+              },
+            ],
+            skip: input.offset,
+            take: input.limit
+          }).then((r) => {
+            r.flatMap((record) => record.cellValues)
+          }); 
+        }
+          val = await ctx.db.record.findMany({
+            where: {
+              tableId: input.tableId,
+              cellValues: {
+                some: {
+                  fieldId: input.filterFieldId,
+                  data: dataFilter,
+                },
+              },
+            },
+            include: {
+              cellValues: true,
+            },
+            orderBy: [
+              {
+                rowIndex: "asc",
+              },
+            ],
+          });
       } else {
         if (input.sortFieldId === "") {
           return await ctx.db.record
@@ -392,18 +420,17 @@ export const tableRouter = createTRPCRouter({
               }
             });
         } else {
-          val = await ctx.db.record
-            .findMany({
-              where: {
-                tableId: input.tableId,
-              },
-              orderBy: {
-                rowIndex: "asc",
-              },
-              include: {
-                cellValues: true,
-              },
-            })
+          val = await ctx.db.record.findMany({
+            where: {
+              tableId: input.tableId,
+            },
+            orderBy: {
+              rowIndex: "asc",
+            },
+            include: {
+              cellValues: true,
+            },
+          });
         }
       }
 
