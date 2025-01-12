@@ -10,6 +10,7 @@ import Loading from "../_components/Loading";
 import BaseSidebar from "../_components/BaseSidebar";
 import { useEffect, useRef, useState } from "react";
 import { RecordValue } from "@prisma/client";
+import { off } from "process";
 
 const BasePage = () => {
   const tableInstanceRef = useRef(null);
@@ -20,7 +21,20 @@ const BasePage = () => {
   );
 
   const { data: tables, isLoading: isTablesLoading } =
-    api.table.getTables.useQuery({ baseId: baseId }, { enabled: !!baseId, refetchOnWindowFocus: false });
+    api.table.getTables.useQuery(
+      { baseId: baseId },
+      { enabled: !!baseId, refetchOnWindowFocus: false },
+    );
+
+  const [selectedView, setSelectedView] = useState("");
+  const {
+    data: view,
+    isLoading: isViewLoading,
+    isFetching: isViewFetching,
+  } = api.table.getTableView.useQuery(
+    { viewId: selectedView },
+    { refetchOnWindowFocus: false },
+  );
 
   const [currentTable, setCurrentTable] = useState(tables?.[0]?.id);
   const [localTables, setLocalTables] = useState(() =>
@@ -30,10 +44,30 @@ const BasePage = () => {
       name,
     })),
   );
+
   const [tableRecords, setTableRecords] = useState<RecordValue[]>([]);
   const [filterOn, setFilterOn] = useState(false);
   const [searchValue, setSearchValue] = useState("");
-  const [selectedView, setSelectedView] = useState("")
+  const [filterFieldId, setFilterFieldId] = useState("");
+  const [filterOp, setFilterOp] = useState("contains");
+  const [filterVal, setFilterVal] = useState("");
+  const [sortFieldId, setSortFieldId] = useState("");
+  const [sortOp, setSortOp] = useState("");
+  const [offset, setOffset] = useState(0);
+
+  
+  useEffect(() => {
+    if (!isViewFetching && !isViewLoading && view) {
+      if (view.filterFieldId !== "") {
+        setFilterOn(true);
+      }
+      setFilterVal(view.filterValue);
+      setFilterFieldId(view.filterFieldId);
+      setFilterOp(view.filterOp);
+      setSortFieldId(view.sortFieldId);
+      setSortOp(view.sortOp);
+    }
+  }, [isViewFetching, isViewLoading, view]);
 
   useEffect(() => {
     if (!currentTable) {
@@ -47,6 +81,10 @@ const BasePage = () => {
       tableInstanceRef.current = null;
     }
   }, [currentTable]);
+
+  useEffect(() => {
+    setFilterOn(false);
+  }, [selectedView])
 
   if (isBaseLoading || isTablesLoading || !base) {
     return <Loading />;
@@ -72,7 +110,16 @@ const BasePage = () => {
           setFilterOn={setFilterOn}
           value={searchValue}
           setSearchValue={setSearchValue}
-          selectedView={selectedView}
+          filterFieldId={filterFieldId}
+          setFilterFieldId={setFilterFieldId}
+          filterOp={filterOp}
+          setFilterOp={setFilterOp}
+          filterVal={filterVal}
+          setFilterVal={setFilterVal}
+          sortFieldId={sortFieldId}
+          setSortFieldId={setSortFieldId}
+          sortOp={sortOp}
+          setSortOp={setSortOp}
         />
         <div className="flex h-full flex-grow overflow-hidden bg-[#f8f8f8]">
           <BaseSidebar
@@ -91,6 +138,17 @@ const BasePage = () => {
             setTableRecords={setTableRecords}
             filterOn={filterOn}
             searchValue={searchValue}
+            selectedView={selectedView}
+            filterFieldId={filterFieldId}
+            setFilterFieldId={setFilterFieldId}
+            filterOp={filterOp}
+            setFilterOp={setFilterOp}
+            filterVal={filterVal}
+            setFilterVal={setFilterVal}
+            sortFieldId={sortFieldId}
+            setSortFieldId={setSortFieldId}
+            sortOp={sortOp}
+            setSortOp={setSortOp}
           />
         </div>
       </div>

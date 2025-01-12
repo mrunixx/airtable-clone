@@ -7,6 +7,7 @@ import {
   protectedProcedure,
   publicProcedure,
 } from "~/server/api/trpc";
+import { createCaller } from "../root";
 
 export const tableRouter = createTRPCRouter({
   create: protectedProcedure
@@ -38,8 +39,8 @@ export const tableRouter = createTRPCRouter({
         include: {
           views: {
             orderBy: {
-              createdAt: "asc"
-            }
+              createdAt: "asc",
+            },
           },
         },
       });
@@ -195,9 +196,9 @@ export const tableRouter = createTRPCRouter({
               filterFieldId: "",
               filterValue: "",
               sortOp: "",
-              sortFieldId: ""
-            }
-          }
+              sortFieldId: "",
+            },
+          },
         },
         include: {
           records: true,
@@ -311,65 +312,104 @@ export const tableRouter = createTRPCRouter({
     )
     .query(async ({ ctx, input }) => {
       let dataFilter;
+      let val;
+      let numVal = -100000;
 
-      const numVal = parseInt(input.filterValue);
-      switch (input.filterOperator) {
-        case "contains":
-          dataFilter = {
-            contains: input.filterValue,
-          };
-          break;
-        case "does not contain":
-          dataFilter = {
-            not: {
+      if (input.filterFieldId !== "") {
+        numVal = parseInt(input.filterValue);
+        switch (input.filterOperator) {
+          case "contains":
+            dataFilter = {
               contains: input.filterValue,
-            },
-          };
-          break;
-        case "is":
-          dataFilter = input.filterValue;
-          break;
-        case "is not":
-          dataFilter = {
-            not: input.filterValue,
-          };
-          break;
-        case "is empty":
-          dataFilter = "";
-          break;
-        case "is not empty":
-          dataFilter = {
-            not: "",
-          };
-          break;
-        default:
-          dataFilter = {};
-          break;
-      }
+            };
+            break;
+          case "does not contain":
+            dataFilter = {
+              not: {
+                contains: input.filterValue,
+              },
+            };
+            break;
+          case "is":
+            dataFilter = input.filterValue;
+            break;
+          case "is not":
+            dataFilter = {
+              not: input.filterValue,
+            };
+            break;
+          case "is empty":
+            dataFilter = "";
+            break;
+          case "is not empty":
+            dataFilter = {
+              not: "",
+            };
+            break;
+          default:
+            dataFilter = {};
+            break;
+        }
 
-      const val = await ctx.db.record.findMany({
-        where: {
-          tableId: input.tableId,
-          cellValues: {
-            some: {
-              fieldId: input.filterFieldId,
-              data: dataFilter,
+        val = await ctx.db.record.findMany({
+          where: {
+            tableId: input.tableId,
+            cellValues: {
+              some: {
+                fieldId: input.filterFieldId,
+                data: dataFilter,
+              },
             },
           },
-        },
-        include: {
-          cellValues: true,
-        },
-        orderBy: [
-          {
-            rowIndex: "asc",
+          include: {
+            cellValues: true,
           },
-        ],
-      });
+          orderBy: [
+            {
+              rowIndex: "asc",
+            },
+          ],
+        });
+      } else {
+        if (input.sortFieldId === "") {
+          return await ctx.db.record
+            .findMany({
+              where: {
+                tableId: input.tableId,
+              },
+              orderBy: {
+                rowIndex: "asc",
+              },
+              include: {
+                cellValues: true,
+              },
+              skip: input.offset,
+              take: input.limit,
+            })
+            .then((r) => {
+              if (input.sortFieldId === "") {
+                return r.flatMap((record) => record.cellValues);
+              }
+            });
+        } else {
+          val = await ctx.db.record
+            .findMany({
+              where: {
+                tableId: input.tableId,
+              },
+              orderBy: {
+                rowIndex: "asc",
+              },
+              include: {
+                cellValues: true,
+              },
+            })
+        }
+      }
 
       switch (input.sortOp) {
         case "A → Z":
-          val.sort((a, b) => {
+          val?.sort((a, b) => {
             const aVal =
               a.cellValues.find((c) => c.fieldId === input.sortFieldId)?.data ??
               "";
@@ -399,7 +439,8 @@ export const tableRouter = createTRPCRouter({
 
       if (
         ["greater than", "less than"].includes(input.filterOperator) &&
-        !isNaN(numVal)
+        !isNaN(numVal) &&
+        numVal !== -100000
       ) {
         return recordValues.filter((r) => {
           const dataNum = parseInt(r.data);

@@ -7,210 +7,65 @@ import { RecordValue } from "@prisma/client";
 
 type Props = {
   tableId: string;
-  setTableRecords: Dispatch<SetStateAction<RecordValue[]>>;
   filterOn: boolean;
   setFilterOn: Dispatch<SetStateAction<boolean>>;
-  selectedView: string;
-  sort: string;
-  setSort: Dispatch<SetStateAction<string>>;
-  sortFieldId: string;
-  setSortFieldId: Dispatch<SetStateAction<string>>;
+  filterFieldId: string;
+  setFilterFieldId: Dispatch<SetStateAction<string>>;
+  filterOp: string;
+  setFilterOp: Dispatch<SetStateAction<string>>;
+  filterVal: string;
+  setFilterVal: Dispatch<SetStateAction<string>>;
 };
 
 export default function FilterPopup({
   tableId,
-  setTableRecords,
   filterOn,
   setFilterOn,
-  selectedView,
-  sort,
-  setSort,
-  sortFieldId,
-  setSortFieldId
+  filterFieldId,
+  setFilterFieldId,
+  filterOp,
+  setFilterOp,
+  filterVal,
+  setFilterVal
 }: Props) {
   const { data: fields } = api.table.getTableHeaders.useQuery(
     { tableId: tableId },
-    { refetchOnWindowFocus: false },
+    { refetchOnWindowFocus: true },
   );
-  const [input, setInput] = useState("");
+  const [input, setInput] = useState(filterVal);
   const [isOpen, setIsOpen] = useState(false);
-  const [field, setField] = useState(fields?.[0]);
-  const [operator, setOperator] = useState("contains");
-
+  const [field, setField] = useState( fields?.[0]);
+  const [operator, setOperator] = useState(filterOp === "" ? "contains" : filterOp);
   const [shouldFetch, setShouldFetch] = useState(false);
-  const [offset, setOffset] = useState(0);
-
-  const viewMutation = api.table.updateTableView.useMutation();
-
-  const {
-    data: records,
-    isLoading,
-    isFetching,
-    refetch
-  } = api.table.getFilteredRecordValues.useQuery(
-    {
-      filterValue: input,
-      filterFieldId: field?.id ?? "",
-      filterOperator: operator,
-      sortOp: sort,
-      sortFieldId: sortFieldId,
-      tableId: tableId,
-      offset: offset,
-      limit: 400,
-    },
-    {
-      enabled: shouldFetch && filterOn,
-    },
-  );
-
-  const { data: originalRecords, refetch: refetchOriginalRecords } = api.table.getTableRecordValues.useQuery(
-    {
-      tableId: tableId,
-      offset: 0,
-      limit: 400,
-    },
-    {
-      refetchOnWindowFocus: false,
-    },
-  );
-
-  const { data: view, isLoading: isViewLoading, isFetching: isViewFetching } = api.table.getTableView.useQuery(
-    { viewId: selectedView },
-    { refetchOnWindowFocus: false },
-  );
 
   const handleOpenChange = (change: boolean) => {
     setIsOpen(change);
   };
 
-  const handleOnClick = async () => {
+  useEffect(() => {
+    setField(() => {
+      const prevField = fields?.find((f) => f.id === filterFieldId) 
+      return prevField !== undefined ? prevField : fields?.[0];
+    })
+  }, [fields])
+
+  const handleOnFilter = async () => {
     if (shouldFetch) {
       return;
     }
     setShouldFetch(true);
     setFilterOn(true); 
-    setOffset(0);
-    await updateTableView();
-  };
-
-  const updateTableView = async () => {
-    await viewMutation.mutateAsync({
-      viewId: selectedView,
-      filterFieldId: field?.id ?? "",
-      filterOp: operator,
-      filterValue: input,
-      sortOp: sort,
-      sortFieldId: sortFieldId,
-    }).then(async () => {
-      setTableRecords([]);
-      setOffset(0);
-      await refetch();
-    });
+    setFilterFieldId(field?.id ?? "");
+    setFilterVal(input);
+    setFilterOp(operator)
   };
 
   const handleResetFilter = async () => {
+    setFilterFieldId("");
+    setFilterVal("");
+    setFilterOp("contains")
     setShouldFetch(false);
-    setFilterOn(false);
-    await refetchOriginalRecords();
   };
-
-  const loadMoreData = () => {
-    if (isLoading || isFetching) return;
-    const newOffset = offset + 400;
-    setOffset(newOffset);
-  };
-
-  useEffect(() => {
-    if (originalRecords) {
-      setTableRecords(originalRecords);
-    }
-  }, [originalRecords])
-
-  useEffect(() => {
-    if (!isLoading && !isFetching && records) {
-      setTableRecords((prev) => [...prev, ...records]);
-      if (records.length < 400) {
-        setShouldFetch(false);
-      }
-    }
-  }, [isLoading, isFetching, records]);
-
-  useEffect(() => {
-    if (!isViewFetching && !isViewLoading && view) {
-      if (view.filterFieldId !== "") {
-        setInput(view.filterValue);
-        setField(() => {
-          return fields?.find((f) => f.id === view.filterFieldId);
-        })
-        setOperator(view.filterOp);
-        setFilterOn(true);
-        setShouldFetch(true);
-      } else {
-        setFilterOn(false);
-      }
-
-      if (view.sortFieldId !== "") {
-        setSortFieldId(view.sortFieldId);
-        setSort(view.sortOp);
-      }
-    }
-  }, [isViewFetching, isViewLoading, view])
-
-  useEffect(() => {
-    if (sortFieldId !== "" && sort !== "") {
-      void updateTableView();
-    }
-    setShouldFetch(true);
-    setTableRecords([]);
-  }, [sortFieldId, sort]);
-
-  // useEffect(() => {
-  //   setField(fields?.[0]);
-  // }, [fields?.[0]]);
-
-  useEffect(() => {
-    if (selectedView !== "") {
-      setShouldFetch(false);
-      setTableRecords([]);
-      setOffset(0);
-    } else {
-      setFilterOn(false);
-    }
-  }, [selectedView]);
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      const element = document.getElementById("table-ref");
-      if (element) {
-        const handleScroll = () => {
-          const { scrollHeight, scrollTop, clientHeight } = element;
-          if (scrollHeight <= clientHeight) return;
-
-          const threshold = clientHeight * 10;
-          if (scrollHeight - scrollTop - clientHeight < threshold) {
-            loadMoreData();
-          }
-        };
-
-        element.addEventListener("scroll", handleScroll);
-
-        clearInterval(interval);
-
-        return () => {
-          element.removeEventListener("scroll", handleScroll);
-        };
-      }
-    }, 500);
-
-    return () => clearInterval(interval);
-  }, [loadMoreData]);
-
-  useEffect(() => {
-    console.log({
-      shouldFetch,
-      filterOn
-    })
-  })
 
   return (
     <Popover
@@ -236,7 +91,7 @@ export default function FilterPopup({
             ></use>
           </svg>
           <p className="ml-1 p-0 text-[14px] font-light leading-[18px] text-[#212123]">
-            Filter
+            {!filterOn ? "Filter" : `Filter by ${field?.name}`}
           </p>
         </div>
       </PopoverTrigger>
@@ -245,6 +100,7 @@ export default function FilterPopup({
         <div className="h-15 flex items-center px-2 py-3 text-sm font-light">
           <p className="w-[72px] px-2">Where</p>
           <FilterFieldDropdown
+            fields={fields ?? []}
             selected={field}
             setSelected={setField}
             tableId={tableId}
@@ -295,7 +151,7 @@ export default function FilterPopup({
         <button
           className="ml-auto mr-3 h-7 rounded-md bg-[#0d70df] px-4 text-[13px] text-white shadow-elevation-low hover:bg-blue-900"
           type="button"
-          onClick={handleOnClick}
+          onClick={handleOnFilter}
         >
           {shouldFetch ? <>Loading...</> : <>Filter</>}
         </button>

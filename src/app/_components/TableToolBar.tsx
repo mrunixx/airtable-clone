@@ -22,7 +22,16 @@ type Props = {
   setFilterOn: Dispatch<SetStateAction<boolean>>;
   value: string;
   setSearchValue: Dispatch<SetStateAction<string>>;
-  selectedView: string;
+  filterFieldId: string;
+  setFilterFieldId: Dispatch<SetStateAction<string>>;
+  filterOp: string;
+  setFilterOp: Dispatch<SetStateAction<string>>;
+  filterVal: string;
+  setFilterVal: Dispatch<SetStateAction<string>>;
+  sortOp: string;
+  setSortOp: Dispatch<SetStateAction<string>>;
+  sortFieldId: string;
+  setSortFieldId: Dispatch<SetStateAction<string>>;
 };
 
 const TableToolBar = ({
@@ -34,10 +43,17 @@ const TableToolBar = ({
   setFilterOn,
   value,
   setSearchValue,
-  selectedView,
+  filterFieldId,
+  filterOp,
+  filterVal,
+  sortOp,
+  sortFieldId,
+  setFilterFieldId,
+  setFilterOp,
+  setFilterVal,
+  setSortOp,
+  setSortFieldId
 }: Props) => {
-  const [sort, setSort] = useState("");
-  const [sortFieldId, setSortFieldId] = useState("");
   return (
     <div className="toolbar flex h-11 w-full items-center pl-3 pr-4">
       <div
@@ -119,14 +135,14 @@ const TableToolBar = ({
       </div>
       <FilterPopup
         tableId={tableId}
-        setTableRecords={setTableRecords}
         filterOn={filterOn}
         setFilterOn={setFilterOn}
-        selectedView={selectedView}
-        sort={sort}
-        setSort={setSort}
-        sortFieldId={sortFieldId}
-        setSortFieldId={setSortFieldId}
+        filterFieldId={filterFieldId}
+        setFilterFieldId={setFilterFieldId}
+        filterVal={filterVal}
+        setFilterVal={setFilterVal}
+        filterOp={filterOp}
+        setFilterOp={setFilterOp} 
       />
       <div
         className="grid-view-options mr-2 flex h-[26px] items-center justify-center rounded-sm px-2 py-1 hover:bg-[#f1f1f2]"
@@ -148,11 +164,9 @@ const TableToolBar = ({
         </p>
       </div>
       <SortDialog
-        tableInstanceRef={tableInstanceRef}
         tableId={tableId}
-        sort={sort}
-        setSort={setSort}
-        selectedView={selectedView}
+        sort={sortOp}
+        setSort={setSortOp}
         sortFieldId={sortFieldId}
         setSortFieldId={setSortFieldId}
       />

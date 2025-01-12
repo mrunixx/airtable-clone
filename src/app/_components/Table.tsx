@@ -31,14 +31,42 @@ type Props = {
     | MutableRefObject<Table<Record<string, string>>>
     | MutableRefObject<null>;
   tableRecords: RecordValue[];
-  setTableRecords: Dispatch<SetStateAction<RecordValue[]>>  
+  setTableRecords: Dispatch<SetStateAction<RecordValue[]>>;
   filterOn: boolean;
   searchValue: string;
+  selectedView: string;
+  filterFieldId: string;
+  setFilterFieldId: Dispatch<SetStateAction<string>>;
+  filterOp: string;
+  setFilterOp: Dispatch<SetStateAction<string>>;
+  filterVal: string;
+  setFilterVal: Dispatch<SetStateAction<string>>;
+  sortOp: string;
+  setSortOp: Dispatch<SetStateAction<string>>;
+  sortFieldId: string;
+  setSortFieldId: Dispatch<SetStateAction<string>>;
 };
 
-const TanstackTable = ({ tableId, tableInstanceRef, tableRecords, setTableRecords, filterOn, searchValue }: Props) => {
+const TanstackTable = ({
+  tableId,
+  tableInstanceRef,
+  tableRecords,
+  setTableRecords,
+  searchValue,
+  selectedView,
+  filterFieldId,
+  filterOp,
+  filterVal,
+  sortOp,
+  sortFieldId,
+  setFilterFieldId,
+  setFilterOp,
+  setFilterVal,
+  setSortOp,
+  setSortFieldId,
+}: Props) => {
   const parentRef = useRef<HTMLDivElement>(null);
-  const [offset, setOffset] = useState(0);
+  const[offset, setOffset] = useState(0);
 
   const createTableRecordMutation = api.table.createTableRecord.useMutation();
   const createTableFieldMutation = api.table.createTableField.useMutation();
@@ -54,9 +82,18 @@ const TanstackTable = ({ tableId, tableInstanceRef, tableRecords, setTableRecord
     isLoading: isRecordsLoading,
     isFetching: isRecordsFetching,
     refetch: refetchRecords,
-  } = api.table.getTableRecordValues.useQuery(
-    { tableId: tableId, offset: offset, limit: 400 },
-    { refetchOnWindowFocus: false, enabled: !filterOn}
+  } = api.table.getFilteredRecordValues.useQuery(
+    {
+      tableId: tableId,
+      filterFieldId: filterFieldId,
+      filterOperator: filterOp,
+      filterValue: filterVal,
+      sortFieldId: sortFieldId,
+      sortOp: sortOp,
+      offset: offset,
+      limit: 400
+    },
+    { refetchOnWindowFocus: false },
   );
 
   const [tableFields, setTableFields] = useState(fields);
@@ -100,6 +137,38 @@ const TanstackTable = ({ tableId, tableInstanceRef, tableRecords, setTableRecord
       })) ?? []
     );
   }, [tableFields, searchValue, tableRecords]);
+  const viewMutation = api.table.updateTableView.useMutation();
+
+  const updateTableView = async () => {
+    await viewMutation
+      .mutateAsync({
+        viewId: selectedView,
+        filterFieldId: filterFieldId,
+        filterOp: filterOp,
+        filterValue: filterVal,
+        sortOp: sortOp,
+        sortFieldId: sortFieldId,
+      })
+      .then(async () => {
+        console.log("just fucked the array")
+        setTableRecords([]);
+        setOffset(0);
+        await refetchRecords();
+      });
+  };
+
+  useEffect(() => {
+    void updateTableView();
+  }, [filterFieldId, filterVal, filterOp, sortFieldId, sortOp]);
+
+  useEffect(() => {
+    setTableRecords([]);
+    setFilterFieldId("");
+    setFilterOp("contains");
+    setFilterVal("");
+    setSortOp("");
+    setSortFieldId("");
+  }, [selectedView]);
 
   const handleAddRecord = async () => {
     if (tableRecords && clickable) {
@@ -175,7 +244,7 @@ const TanstackTable = ({ tableId, tableInstanceRef, tableRecords, setTableRecord
     const newOffset = offset + 400;
     setOffset(newOffset);
   };
-  
+
   useEffect(() => {
     const interval = setInterval(() => {
       const element = parentRef.current;
@@ -260,10 +329,7 @@ const TanstackTable = ({ tableId, tableInstanceRef, tableRecords, setTableRecord
               return headerGroup.headers.map((header, index) => {
                 {
                   return (
-                    <div
-                      key={index}
-                      className="m-0 p-0"
-                    >
+                    <div key={index} className="m-0 p-0">
                       {flexRender(
                         header.column.columnDef.header,
                         header.getContext(),

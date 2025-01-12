@@ -8,23 +8,18 @@ import { Field } from "@prisma/client";
   import { api } from "~/trpc/react";
   
   type Props = {
+    fields: Field[];
     selected: Field | undefined;
     setSelected: Dispatch<SetStateAction<Field | undefined>>
     tableId: string;
   };
   
-  const FilterFieldDropdown = ({ selected, setSelected, tableId }: Props) => {
+  const FilterFieldDropdown = ({fields, selected, setSelected, tableId }: Props) => {
     const [isOpen, setIsOpen] = useState(false);
   
     const handleOpenChange = (change: boolean) => {
       setIsOpen(change);
     };
-  
-    const { data: fields } =
-      api.table.getTableHeaders.useQuery(
-        { tableId: tableId },
-        { refetchOnWindowFocus: true},
-      );
   
     const handleClick = (field: Field) => {
       setSelected(field);
