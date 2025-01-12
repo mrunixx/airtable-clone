@@ -53,8 +53,6 @@ const BasePage = () => {
   const [filterVal, setFilterVal] = useState("");
   const [sortFieldId, setSortFieldId] = useState("");
   const [sortOp, setSortOp] = useState("");
-  const [offset, setOffset] = useState(0);
-
   
   useEffect(() => {
     if (!isViewFetching && !isViewLoading && view) {

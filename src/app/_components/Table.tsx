@@ -99,7 +99,6 @@ const TanstackTable = ({
   const [tableFields, setTableFields] = useState(fields);
   const [tableReady, setTableReady] = useState(false);
   const [clickable, setClickable] = useState(true);
-  const [hasMore, setHasMore] = useState(true);
   const transformedData = useMemo(() => {
     const grouped: Record<string, Record<string, string>> = {};
 
@@ -150,7 +149,6 @@ const TanstackTable = ({
         sortFieldId: sortFieldId,
       })
       .then(async () => {
-        console.log("just fucked the array")
         setTableRecords([]);
         setOffset(0);
         await refetchRecords();
@@ -158,6 +156,7 @@ const TanstackTable = ({
   };
 
   useEffect(() => {
+    console.log("updated table view with: ", {filterFieldId, filterVal, filterOp, sortFieldId, sortOp})
     void updateTableView();
   }, [filterFieldId, filterVal, filterOp, sortFieldId, sortOp]);
 
@@ -240,7 +239,7 @@ const TanstackTable = ({
   tableInstanceRef.current = tableInstance;
 
   const loadMoreData = () => {
-    if (!hasMore || isRecordsLoading || isRecordsFetching) return;
+    if (isRecordsLoading || isRecordsFetching) return;
     const newOffset = offset + 400;
     setOffset(newOffset);
   };
@@ -280,11 +279,7 @@ const TanstackTable = ({
 
   useEffect(() => {
     if (!isRecordsLoading && !isRecordsFetching && records) {
-      if (records.length === 0) {
-        setHasMore(false);
-      } else {
         setTableRecords((prev) => [...prev, ...records]);
-      }
     }
   }, [isRecordsLoading, isRecordsFetching, records]);
 
@@ -308,11 +303,14 @@ const TanstackTable = ({
     setTableReady(false);
     setTableRecords([]);
     setOffset(0);
-    setHasMore(true);
     void refetchRecords();
   }, [tableId]);
 
   if (isBaseLoading || !tableReady) {
+    return <Loading />;
+  }
+
+  if (offset === 0 && (isRecordsLoading || isRecordsFetching)) {
     return <Loading />;
   }
 

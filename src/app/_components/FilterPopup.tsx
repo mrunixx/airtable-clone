@@ -34,9 +34,8 @@ export default function FilterPopup({
   );
   const [input, setInput] = useState(filterVal);
   const [isOpen, setIsOpen] = useState(false);
-  const [field, setField] = useState( fields?.[0]);
+  const [field, setField] = useState(fields?.[0]);
   const [operator, setOperator] = useState(filterOp === "" ? "contains" : filterOp);
-  const [shouldFetch, setShouldFetch] = useState(false);
 
   const handleOpenChange = (change: boolean) => {
     setIsOpen(change);
@@ -50,22 +49,31 @@ export default function FilterPopup({
   }, [fields])
 
   const handleOnFilter = async () => {
-    if (shouldFetch) {
+    if (filterFieldId === field?.id && filterVal === input && filterOp === operator) {
       return;
     }
-    setShouldFetch(true);
     setFilterOn(true); 
     setFilterFieldId(field?.id ?? "");
     setFilterVal(input);
     setFilterOp(operator)
+    setIsOpen(false);
   };
 
   const handleResetFilter = async () => {
     setFilterFieldId("");
     setFilterVal("");
     setFilterOp("contains")
-    setShouldFetch(false);
+    setIsOpen(false);
+    setFilterOn(false);
   };
+
+  useEffect(() => {
+    setInput(filterVal)
+  }, [filterVal]);
+
+  useEffect(() => {
+    setOperator(filterOp)
+  }, [filterOp]);
 
   return (
     <Popover
@@ -153,7 +161,7 @@ export default function FilterPopup({
           type="button"
           onClick={handleOnFilter}
         >
-          {shouldFetch ? <>Loading...</> : <>Filter</>}
+          Filter
         </button>
       </PopoverContent>
     </Popover>
