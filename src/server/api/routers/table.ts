@@ -540,7 +540,9 @@ export const tableRouter = createTRPCRouter({
         where: {
           cellValues: {
             some: {
-              data: input.searchValue
+              data:{
+                contains: input.searchValue
+              }
             }
           }
         },
