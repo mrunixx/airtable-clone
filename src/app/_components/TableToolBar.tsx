@@ -214,9 +214,8 @@ const TableToolBar = ({
           Share and sync
         </p>
       </div>
-      <SearchPopup value={value} setValue={setSearchValue} />
+      <SearchPopup value={value} setValue={setSearchValue} tableId={tableId} setTableRecords={setTableRecords} tableRecords={tableRecords}/>
     </div>
   );
 };
-
 export default TableToolBar;

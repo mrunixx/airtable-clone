@@ -1,27 +1,75 @@
 import { Popover, PopoverContent, PopoverTrigger } from "@nextui-org/react";
+import { RecordValue } from "@prisma/client";
 import { Dispatch, SetStateAction, use, useEffect, useState } from "react";
 import { api } from "~/trpc/react";
 
 type Props = {
-  value: string,
-  setValue: Dispatch<SetStateAction<string>>
-}
+  value: string;
+  setValue: Dispatch<SetStateAction<string>>;
+  tableId: string;
+  tableRecords: RecordValue[];
+  setTableRecords: Dispatch<SetStateAction<RecordValue[]>>;
+};
 
-const SearchPopup = ({ value, setValue } : Props) => {
-  const [input, setInput] = useState("") 
+const SearchPopup = ({
+  value,
+  setValue,
+  tableId,
+  setTableRecords,
+  tableRecords,
+}: Props) => {
+  const [input, setInput] = useState("");
   const [isOpen, setIsOpen] = useState(false);
-  const {data: record, isFetching, isLoading} = api.table.getSearchRecord.useQuery({searchValue: value});
+  const {
+    data: record,
+    isFetching,
+    isLoading,
+  } = api.table.getSearchRecord.useQuery({ searchValue: value });
+  const {
+    data: searchRecords,
+    isFetching: isRecordsFetching,
+    isLoading: isRecordsLoading,
+  } = api.table.getFilteredRecordValues.useQuery({
+    tableId: tableId,
+    offset: 0,
+    limit: (record?.rowIndex ?? 0) + 40,
+    filterOperator: "",
+    filterFieldId: "",
+    filterValue: "",
+    sortOp: "",
+    sortFieldId: "",
+  });
+
   const handleOpenChange = (change: boolean) => {
     setIsOpen(change);
   };
 
   useEffect(() => {
-    console.log(record)
-  }, [record])
+    console.log(record);
+    // get table records up to the row index of the record
+    // scroll down to bottom
+    // set offset to row index
+  }, [record]);
+
+  useEffect(() => {
+    if (!isRecordsFetching && !isRecordsLoading && searchRecords) {
+      // setTableRecords to searchRecords
+      setTableRecords(searchRecords);
+    }
+  }, [isRecordsFetching, isRecordsLoading, searchRecords]);
+
+  useEffect(() => {
+    if (record) {
+      const element = document.getElementById("table-ref");
+      if (element) {
+        element.scrollTo(0, (record?.rowIndex ?? 0) * 32);
+      }
+    }
+  }, [tableRecords]);
 
   useEffect(() => {
     const delayDebounceFn = setTimeout(() => {
-      setValue(input); 
+      setValue(input);
     }, 600);
 
     return () => clearTimeout(delayDebounceFn);
@@ -58,7 +106,10 @@ const SearchPopup = ({ value, setValue } : Props) => {
             value={input}
             onChange={(e) => setInput(e.target.value)}
           />
-          <div className="ml-auto flex items-center justify-center" onClick={() => setInput("")}>
+          <div
+            className="ml-auto flex items-center justify-center"
+            onClick={() => setInput("")}
+          >
             <svg
               width="16"
               height="16"
@@ -72,9 +123,9 @@ const SearchPopup = ({ value, setValue } : Props) => {
             </svg>
           </div>
         </div>
-        <div className="h-[54px] w-full bg-[#f2f2f2] p-2 font-light flex flex-col gap-1">
+        <div className="flex h-[54px] w-full flex-col gap-1 bg-[#f2f2f2] p-2 font-light">
           <p className="text-xs">Use advanced search options in the</p>
-          <div className="flex items-center gap-1 cursor-pointer">
+          <div className="flex cursor-pointer items-center gap-1">
             <svg
               width="16"
               height="16"
